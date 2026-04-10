@@ -38,11 +38,27 @@ spec:
       kind: StatefulSet
       name: nfs-storage-nfs-server-provisioner
       jsonPointers:
+        - /metadata/labels/app.kubernetes.io~1instance
         - /spec/persistentVolumeClaimRetentionPolicy
         - /spec/podManagementPolicy
         - /spec/revisionHistoryLimit
+        - /spec/template/metadata/creationTimestamp
+        - /spec/template/spec/containers/0/env/0/valueFrom/fieldRef/apiVersion
+        - /spec/template/spec/containers/0/env/2/valueFrom/fieldRef/apiVersion
+        - /spec/template/spec/containers/0/resources
+        - /spec/template/spec/containers/0/terminationMessagePath
+        - /spec/template/spec/containers/0/terminationMessagePolicy
+        - /spec/template/spec/dnsPolicy
+        - /spec/template/spec/restartPolicy
+        - /spec/template/spec/schedulerName
+        - /spec/template/spec/securityContext
         - /spec/updateStrategy
         - /spec/template/spec/serviceAccount
+        - /spec/volumeClaimTemplates/0/apiVersion
+        - /spec/volumeClaimTemplates/0/kind
+        - /spec/volumeClaimTemplates/0/metadata/creationTimestamp
+        - /spec/volumeClaimTemplates/0/spec/volumeMode
+        - /spec/volumeClaimTemplates/0/status
   syncPolicy:
     automated:
       prune: true
