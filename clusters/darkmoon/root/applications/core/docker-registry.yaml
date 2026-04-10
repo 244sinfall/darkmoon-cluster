@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: docker-registry
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  project: platform
+  source:
+    repoURL: https://twuni.github.io/docker-registry.helm
+    chart: docker-registry
+    targetRevision: 3.0.0
+    helm:
+      releaseName: docker-registry
+      values: |
+        persistence:
+          enabled: true
+          storageClass: local-path
+          accessMode: ReadWriteOnce
+          size: 20Gi
+        ingress:
+          enabled: true
+          className: nginx
+          path: /v2/
+          hosts:
+            - registryv2.rp-wow.ru
+          annotations:
+            cert-manager.io/cluster-issuer: letsencrypt-prod
+          tls:
+            - secretName: registryv2-rp-wow-ru-tls
+              hosts:
+                - registryv2.rp-wow.ru
+        extraEnvVars:
+          - name: REGISTRY_AUTH
+            value: htpasswd
+          - name: REGISTRY_AUTH_HTPASSWD_REALM
+            value: Registry Realm
+          - name: REGISTRY_AUTH_HTPASSWD_PATH
+            value: /auth/htpasswd
+        extraVolumeMounts:
+          - name: auth
+            mountPath: /auth
+            readOnly: true
+        extraVolumes:
+          - name: auth
+            secret:
+              secretName: registry-basic-auth
+              items:
+                - key: htpasswd
+                  path: htpasswd
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: registry
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

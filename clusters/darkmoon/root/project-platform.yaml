@@ -10,6 +10,10 @@ spec:
   sourceRepos:
     - git@github.com:244sinfall/darkmoon-cluster.git
     - https://charts.jetstack.io
+    - https://github.com/rancher/local-path-provisioner.git
+    - https://kvaps.github.io/charts
+    - https://twuni.github.io/docker-registry.helm
+    - https://helm.joxit.dev
   destinations:
     - namespace: '*'
       server: https://kubernetes.default.svc

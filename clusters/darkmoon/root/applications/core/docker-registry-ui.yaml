@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: docker-registry-ui
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  project: platform
+  source:
+    repoURL: https://helm.joxit.dev
+    chart: docker-registry-ui
+    targetRevision: 1.1.3
+    helm:
+      releaseName: registry-ui
+      values: |
+        fullnameOverride: registry-ui
+        ui:
+          title: Darkmoon Registry
+          proxy: false
+          dockerRegistryUrl: https://registryv2.rp-wow.ru
+          pullUrl: registryv2.rp-wow.ru
+          singleRegistry: true
+          registrySecured: true
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            host: registryv2.rp-wow.ru
+            path: /
+            pathType: Prefix
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+            tls:
+              - secretName: registryv2-rp-wow-ru-tls
+                hosts:
+                  - registryv2.rp-wow.ru
+        registry:
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: registry
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

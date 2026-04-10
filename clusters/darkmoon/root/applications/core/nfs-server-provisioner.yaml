@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nfs-server-provisioner
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: platform
+  source:
+    repoURL: https://kvaps.github.io/charts
+    chart: nfs-server-provisioner
+    targetRevision: 1.8.0
+    helm:
+      releaseName: nfs-storage
+      values: |
+        persistence:
+          enabled: true
+          storageClass: local-path
+          accessMode: ReadWriteOnce
+          size: 30Gi
+        storageClass:
+          create: true
+          name: nfs-shared
+          defaultClass: false
+          reclaimPolicy: Delete
+        nodeSelector:
+          kubernetes.io/hostname: control-plane.dm
+        tolerations:
+          - key: node-role.kubernetes.io/control-plane
+            operator: Exists
+            effect: NoSchedule
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: nfs-storage
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
