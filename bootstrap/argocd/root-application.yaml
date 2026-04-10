@@ -4,7 +4,7 @@ metadata:
   name: cluster-root
   namespace: argocd
 spec:
-  project: platform
+  project: default
   source:
     repoURL: git@github.com:244sinfall/darkmoon-cluster.git
     targetRevision: HEAD
