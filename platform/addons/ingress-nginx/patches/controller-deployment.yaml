@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+spec:
+  template:
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      nodeSelector:
+        kubernetes.io/hostname: worker.dm
+      containers:
+        - name: controller
+          args:
+            - /nginx-ingress-controller
+            - --election-id=ingress-nginx-leader
+            - --controller-class=k8s.io/ingress-nginx
+            - --ingress-class=nginx
+            - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
+            - --report-node-internal-ip-address=true

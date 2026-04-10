@@ -8,26 +8,9 @@ metadata:
 spec:
   project: platform
   source:
-    repoURL: https://kubernetes.github.io/ingress-nginx
-    chart: ingress-nginx
-    targetRevision: 4.15.1
-    helm:
-      releaseName: ingress-nginx
-      values: |
-        controller:
-          kind: DaemonSet
-          hostNetwork: true
-          dnsPolicy: ClusterFirstWithHostNet
-          reportNodeInternalIp: true
-          publishService:
-            enabled: false
-          watchIngressWithoutClass: true
-          nodeSelector:
-            kubernetes.io/hostname: worker.dm
-          service:
-            type: ClusterIP
-        admissionWebhooks:
-          enabled: false
+    repoURL: git@github.com:244sinfall/darkmoon-cluster.git
+    targetRevision: HEAD
+    path: platform/addons/ingress-nginx
   destination:
     server: https://kubernetes.default.svc
     namespace: ingress-nginx
@@ -38,3 +21,4 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - Replace=true
