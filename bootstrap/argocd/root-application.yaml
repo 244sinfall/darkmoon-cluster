@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cluster-root
+  namespace: argocd
+spec:
+  project: platform
+  source:
+    repoURL: git@github.com:244sinfall/darkmoon-cluster.git
+    targetRevision: HEAD
+    path: clusters/shared-new
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
