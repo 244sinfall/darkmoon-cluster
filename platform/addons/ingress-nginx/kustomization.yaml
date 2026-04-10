@@ -2,9 +2,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/baremetal/deploy.yaml
+  - controller-daemonset.yaml
 patches:
   - path: patches/delete-namespace.yaml
   - path: patches/delete-admission-create-job.yaml
   - path: patches/delete-admission-patch-job.yaml
-  - path: patches/controller-deployment.yaml
+  - path: patches/delete-controller-deployment.yaml
   - path: patches/controller-service.yaml
