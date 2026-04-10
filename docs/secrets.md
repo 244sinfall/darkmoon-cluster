@@ -86,9 +86,24 @@ If you lose the private key, you lose the ability to decrypt and update encrypte
 
 ## Argo CD integration
 
-This repo is prepared for SOPS usage locally first.
+This repo uses `KSOPS` for Argo CD integration.
 
-The next step is wiring Argo CD repo-server to decrypt `SOPS` files during manifest generation. The clean path for that cluster is `KSOPS` or an Argo CD config-management plugin, with the `age` private key stored in-cluster as a Kubernetes secret.
+`KSOPS` is a Kustomize plugin that calls `sops` during manifest generation. The
+flow is:
+
+1. Argo CD runs `kustomize build`.
+2. Kustomize sees a `ksops` generator.
+3. `KSOPS` decrypts the referenced `*.enc.yaml` file with `sops`.
+4. `sops` reads the mounted `age` private key and emits a normal Secret
+   manifest to Argo CD.
+
+Bootstrap files for Argo live under:
+
+- `bootstrap/argocd/ksops/argocd-cm-patch.yaml`
+- `bootstrap/argocd/ksops/argocd-repo-server-patch.yaml`
+- `bootstrap/argocd/ksops/README.md`
+
+The `age` private key must exist in-cluster as the `argocd/sops-age` secret.
 
 ## Example file
 
@@ -96,4 +111,6 @@ This repo includes one teaching example at:
 
 `clusters/prod/shared-new/config/secrets/example-secret.enc.yaml`
 
-It is not referenced by any live application. It only exists so you can inspect a real encrypted secret and practice editing it safely.
+It is referenced by `clusters/prod/shared-new/config/secrets/example-secret-generator.yaml`
+so you can prove end-to-end decryption through Argo CD. It creates the
+`example-app-secret` Secret in the `test-echo` namespace.

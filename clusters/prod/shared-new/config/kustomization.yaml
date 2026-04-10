@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - issuers
   - namespaces
+  - secrets
   - ../../../../apps/test-echo/overlays/prod-shared-new
