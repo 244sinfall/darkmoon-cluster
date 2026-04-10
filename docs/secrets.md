@@ -25,7 +25,7 @@ The public key currently configured in [/.sops.yaml](/home/dmitry/Dev/Personal/d
 
 Use encrypted secret files in one of these patterns:
 
-- `clusters/<env>/<cluster>/config/secrets/*.enc.yaml`
+- `clusters/<cluster>/config/secrets/*.enc.yaml`
 - `apps/<app>/secrets/*.enc.yaml`
 
 Keep plain manifests out of Git once they contain real secret values.
@@ -42,16 +42,16 @@ Keep plain manifests out of Git once they contain real secret values.
 Encrypt an already named file in place:
 
 ```bash
-SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -e -i clusters/prod/shared-new/config/secrets/example-secret.enc.yaml
+SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -e -i clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml
 ```
 
 Create a new encrypted file from a temporary plain manifest:
 
 ```bash
 SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -e \
-  --filename-override /home/dmitry/Dev/Personal/darkmoon-cluster/clusters/prod/shared-new/config/secrets/example-secret.enc.yaml \
-  --output clusters/prod/shared-new/config/secrets/example-secret.enc.yaml \
-  /tmp/example-secret.yaml
+  --filename-override /home/dmitry/Dev/Personal/darkmoon-cluster/clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml \
+  --output clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml \
+  .local/secrets/cloudflare-api-key.yaml
 ```
 
 `--filename-override` matters when the input file is outside the final repo path. That is how `sops` knows which `.sops.yaml` creation rule to use.
@@ -59,19 +59,19 @@ SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -e \
 Edit an encrypted file:
 
 ```bash
-SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops clusters/prod/shared-new/config/secrets/example-secret.enc.yaml
+SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml
 ```
 
 View decrypted content without modifying:
 
 ```bash
-SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -d clusters/prod/shared-new/config/secrets/example-secret.enc.yaml
+SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -d clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml
 ```
 
 Rotate encryption to the current `.sops.yaml` recipients:
 
 ```bash
-SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops updatekeys -y clusters/prod/shared-new/config/secrets/example-secret.enc.yaml
+SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops updatekeys -y clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml
 ```
 
 ## Backup rule
@@ -105,12 +105,12 @@ Bootstrap files for Argo live under:
 
 The `age` private key must exist in-cluster as the `argocd/sops-age` secret.
 
-## Example file
+## Current repo secret
 
-This repo includes one teaching example at:
+The cluster currently includes:
 
-`clusters/prod/shared-new/config/secrets/example-secret.enc.yaml`
+`clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml`
 
-It is referenced by `clusters/prod/shared-new/config/secrets/example-secret-generator.yaml`
-so you can prove end-to-end decryption through Argo CD. It creates the
-`example-app-secret` Secret in the `test-echo` namespace.
+It is referenced by `clusters/darkmoon/config/secrets/secret-generator.yaml`
+and is consumed by the Let's Encrypt DNS solver through the
+`cloudflare-api-token` Secret.

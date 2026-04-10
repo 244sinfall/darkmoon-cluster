@@ -1,28 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cluster-config
+  name: test-echo
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "3"
 spec:
-  project: platform
+  project: apps
   source:
     repoURL: git@github.com:244sinfall/darkmoon-cluster.git
     targetRevision: HEAD
-    path: clusters/prod/shared-new/config
+    path: apps/test-echo/overlays/playground
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
-  ignoreDifferences:
-    - group: networking.k8s.io
-      kind: Ingress
-      jsonPointers:
-        - /status/loadBalancer
+    namespace: playground
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - SkipDryRunOnMissingResource=true
+      - ServerSideApply=true

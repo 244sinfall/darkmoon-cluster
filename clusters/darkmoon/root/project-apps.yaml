@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: apps
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  description: Effective workloads to manage
+  sourceRepos:
+    - git@github.com:244sinfall/darkmoon-cluster.git
+    - https://charts.jetstack.io
+  destinations:
+    - namespace: dev
+      server: https://kubernetes.default.svc
+    - namespace: stage
+      server: https://kubernetes.default.svc
+    - namespace: prod
+      server: https://kubernetes.default.svc
+    - namespace: playground
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist: []
