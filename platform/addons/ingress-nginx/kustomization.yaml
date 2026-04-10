@@ -7,5 +7,7 @@ patches:
   - path: patches/delete-namespace.yaml
   - path: patches/delete-admission-create-job.yaml
   - path: patches/delete-admission-patch-job.yaml
+  - path: patches/delete-admission-service.yaml
   - path: patches/delete-controller-deployment.yaml
   - path: patches/controller-service.yaml
+  - path: patches/delete-validating-webhook.yaml

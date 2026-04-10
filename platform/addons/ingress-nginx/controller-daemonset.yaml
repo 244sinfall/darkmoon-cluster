@@ -68,9 +68,6 @@ spec:
             - containerPort: 443
               name: https
               protocol: TCP
-            - containerPort: 8443
-              name: webhook
-              protocol: TCP
           livenessProbe:
             httpGet:
               path: /healthz
@@ -108,11 +105,3 @@ spec:
             runAsUser: 101
             seccompProfile:
               type: RuntimeDefault
-          volumeMounts:
-            - mountPath: /usr/local/certificates/
-              name: webhook-cert
-              readOnly: true
-      volumes:
-        - name: webhook-cert
-          secret:
-            secretName: ingress-nginx-admission
