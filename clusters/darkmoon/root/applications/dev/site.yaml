@@ -14,6 +14,33 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: dev
+  ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      name: mysql
+      namespace: dev
+      jsonPointers:
+        - /metadata/labels/app.kubernetes.io~1instance
+        - /spec/persistentVolumeClaimRetentionPolicy
+        - /spec/podManagementPolicy
+        - /spec/revisionHistoryLimit
+        - /spec/template/metadata/creationTimestamp
+        - /spec/template/spec/containers/0/imagePullPolicy
+        - /spec/template/spec/containers/0/ports/0/protocol
+        - /spec/template/spec/containers/0/resources
+        - /spec/template/spec/containers/0/terminationMessagePath
+        - /spec/template/spec/containers/0/terminationMessagePolicy
+        - /spec/template/spec/dnsPolicy
+        - /spec/template/spec/restartPolicy
+        - /spec/template/spec/schedulerName
+        - /spec/template/spec/securityContext
+        - /spec/template/spec/terminationGracePeriodSeconds
+        - /spec/updateStrategy
+        - /spec/volumeClaimTemplates/0/apiVersion
+        - /spec/volumeClaimTemplates/0/kind
+        - /spec/volumeClaimTemplates/0/metadata/creationTimestamp
+        - /spec/volumeClaimTemplates/0/spec/volumeMode
+        - /spec/volumeClaimTemplates/0/status
   syncPolicy:
     automated:
       prune: true
