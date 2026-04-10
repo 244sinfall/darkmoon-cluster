@@ -1,0 +1,8 @@
+creation_rules:
+  - path_regex: .*config/secrets/.*\.enc\.ya?ml$
+    age: age1rnfzyrzrlykyx2ak7jymfd6f4293e65kfchtgmrvuty6wl8dydeqqcnkg3
+  - path_regex: .*apps/.*/secrets/.*\.enc\.ya?ml$
+    age: age1rnfzyrzrlykyx2ak7jymfd6f4293e65kfchtgmrvuty6wl8dydeqqcnkg3
+stores:
+  yaml:
+    indent: 2
