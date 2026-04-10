@@ -33,3 +33,42 @@ The bootstrap model is simple:
 - Keep Argo CD installation bootstrap small and explicit.
 - Do not put secrets in this repo unencrypted.
 - Keep `apps/` mostly namespace-agnostic and let cluster-level Argo CD applications decide where each overlay is deployed.
+
+## Local Verification
+
+Install standalone `kustomize` and `ksops` locally. The repo uses `ksops` exec plugins, so `kubectl kustomize` is not enough for secret-backed overlays.
+
+```bash
+mkdir -p ~/.local/bin /tmp/codex-install
+cd /tmp/codex-install
+
+curl -fL -o kustomize_v5.8.1_linux_amd64.tar.gz \
+  https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v5.8.1/kustomize_v5.8.1_linux_amd64.tar.gz
+curl -fL -o kustomize-checksums.txt \
+  https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v5.8.1/checksums.txt
+sha256sum -c <(grep 'kustomize_v5.8.1_linux_amd64.tar.gz' kustomize-checksums.txt)
+tar -xzf kustomize_v5.8.1_linux_amd64.tar.gz
+install -m 0755 kustomize ~/.local/bin/kustomize
+
+curl -fL -o ksops_4.4.0_Linux_x86_64.tar.gz \
+  https://github.com/viaduct-ai/kustomize-sops/releases/download/v4.4.0/ksops_4.4.0_Linux_x86_64.tar.gz
+curl -fL -o ksops-checksums.txt \
+  https://github.com/viaduct-ai/kustomize-sops/releases/download/v4.4.0/checksums.txt
+sha256sum -c <(grep 'ksops_4.4.0_Linux_x86_64.tar.gz' ksops-checksums.txt)
+tar -xzf ksops_4.4.0_Linux_x86_64.tar.gz
+install -m 0755 ksops ~/.local/bin/ksops
+```
+
+Use an absolute age key path when rendering locally with `kustomize` plus `ksops`:
+
+```bash
+export SOPS_AGE_KEY_FILE=/home/dmitry/Dev/Personal/darkmoon-cluster/.local/sops/age-key.txt
+```
+
+Any change to app manifests, cluster config, Argo applications, or KSOPS-backed secrets should be rendered locally before it is considered done.
+
+```bash
+~/.local/bin/kustomize build --enable-alpha-plugins --enable-exec apps/site/overlays/dev
+~/.local/bin/kustomize build --enable-alpha-plugins --enable-exec clusters/darkmoon/config
+kubectl kustomize clusters/darkmoon/root
+```

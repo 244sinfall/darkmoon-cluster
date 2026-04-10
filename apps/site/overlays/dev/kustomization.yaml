@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: dev
+resources:
+  - ../../base
+  - ../../../_shared/image-pull-secret
+  - config-files.yaml
+  - ingress.yaml
+  - mysql-service.yaml
+  - mysql-statefulset.yaml
+  - storage-pvcs.yaml
+generators:
+  - secret-generator.yaml
+replicas:
+  - name: site
+    count: 1

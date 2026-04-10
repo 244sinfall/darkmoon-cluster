@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: site
+  labels:
+    app.kubernetes.io/name: site
+    app.kubernetes.io/part-of: site
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: site
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: site
+        app.kubernetes.io/part-of: site
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      volumes:
+        - name: site-secret-config
+          secret:
+            secretName: site-config
+            defaultMode: 0644
+        - name: site-config-files
+          configMap:
+            name: site-config-files
+            defaultMode: 0644
+        - name: site-upload
+          persistentVolumeClaim:
+            claimName: site-upload-claim
+        - name: site-cache
+          persistentVolumeClaim:
+            claimName: site-cache-claim
+        - name: site-sessions
+          persistentVolumeClaim:
+            claimName: site-sessions-claim
+      containers:
+        - name: site
+          image: registryv2.rp-wow.ru/icms2:v2.16.3-0.1.21
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: site-secret-config
+              mountPath: /var/www/html/system/config/config.php
+              subPath: config.php
+            - name: site-config-files
+              mountPath: /var/www/html/system/config/mimetypes.php
+              subPath: mimetypes.php
+            - name: site-config-files
+              mountPath: /var/www/html/system/config/remap.php
+              subPath: remap.php
+            - name: site-config-files
+              mountPath: /var/www/html/system/config/theme_default.yml
+              subPath: theme_default.yml
+            - name: site-config-files
+              mountPath: /var/www/html/system/config/theme_modern.yml
+              subPath: theme_modern.yml
+            - name: site-upload
+              mountPath: /var/www/html/upload
+            - name: site-cache
+              mountPath: /var/www/html/cache
+            - name: site-sessions
+              mountPath: /sessions
