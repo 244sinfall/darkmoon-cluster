@@ -5,3 +5,5 @@ resources:
 patches:
   - path: patches/controller-deployment.yaml
   - path: patches/controller-service.yaml
+  - path: patches/admission-create-job.yaml
+  - path: patches/admission-patch-job.yaml
