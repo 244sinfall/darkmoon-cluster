@@ -3,10 +3,14 @@ kind: AppProject
 metadata:
   name: platform
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   description: Core platform workloads managed by Argo CD
   sourceRepos:
-    - '*'
+    - git@github.com:244sinfall/darkmoon-cluster.git
+    - https://charts.jetstack.io
+    - https://kubernetes.github.io/ingress-nginx
   destinations:
     - namespace: '*'
       server: https://kubernetes.default.svc

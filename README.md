@@ -19,8 +19,9 @@ Until that DNS or kubeconfig endpoint issue is fixed, any bootstrap apply will f
 ## Repository layout
 
 - `bootstrap/argocd/`: first-run manifests and bootstrap notes
-- `clusters/shared-new/`: cluster-specific GitOps entrypoint
-- `platform/argocd/`: Argo CD objects managed by Argo itself
+- `clusters/prod/shared-new/root/`: cluster-specific GitOps entrypoint
+- `clusters/prod/shared-new/config/`: cluster-local config such as issuers and test routing
+- `apps/`: workload manifests and overlays
 
 ## Recommended bootstrap flow
 
@@ -28,7 +29,7 @@ Until that DNS or kubeconfig endpoint issue is fixed, any bootstrap apply will f
    - `kubectl cluster-info`
    - `kubectl get nodes`
 2. Install Argo CD from the official upstream manifest, pinned to a specific version you choose.
-3. Patch `repoURL` in `bootstrap/argocd/root-application.yaml`.
+3. Patch `repoURL` in `bootstrap/argocd/root-application.yaml` if needed.
 4. Apply the root application:
    - `kubectl apply -f bootstrap/argocd/root-application.yaml`
 

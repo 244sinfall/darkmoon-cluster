@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-echo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-echo
+  template:
+    metadata:
+      labels:
+        app: test-echo
+    spec:
+      containers:
+        - name: echo
+          image: hashicorp/http-echo:1.0.0
+          args:
+            - -listen=:5678
+            - -text=test-new-cluster.rp-wow.ru is served by Argo CD
+          ports:
+            - containerPort: 5678
+              name: http
