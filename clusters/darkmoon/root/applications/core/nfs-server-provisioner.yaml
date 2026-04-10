@@ -33,6 +33,16 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: nfs-storage
+  ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      name: nfs-storage-nfs-server-provisioner
+      jsonPointers:
+        - /spec/persistentVolumeClaimRetentionPolicy
+        - /spec/podManagementPolicy
+        - /spec/revisionHistoryLimit
+        - /spec/updateStrategy
+        - /spec/template/spec/serviceAccount
   syncPolicy:
     automated:
       prune: true
