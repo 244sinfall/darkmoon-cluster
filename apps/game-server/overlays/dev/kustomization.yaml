@@ -14,9 +14,9 @@ generators:
   - secret-generator.yaml
 replicas:
   - name: dev-world-bnetserver
-    count: 1
+    count: 0
   - name: dev-world-worldserver
-    count: 1
+    count: 0
 patches:
   - path: bnetserver-dev-patch.yaml
   - path: worldserver-dev-patch.yaml
