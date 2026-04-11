@@ -30,6 +30,10 @@ spec:
                   key: default
             - name: ENVIRONMENT
               value: "production"
+            - name: WG_DEFAULT_ADDRESS
+              value: "2.44.x.x"
+            - name: WG_PRE_UP
+              value: sysctl net.ipv4.ip_forward=1
           ports:
             - name: wireguard
               containerPort: 51820
@@ -81,6 +85,8 @@ spec:
                   key: internal
             - name: ENVIRONMENT
               value: "production"
+            - name: WG_DEFAULT_ADDRESS
+              value: "2.44.x.x"
             - name: WG_PRE_UP
               value: sysctl net.ipv4.ip_forward=1
           ports:
@@ -132,6 +138,8 @@ spec:
                   key: external
             - name: ENVIRONMENT
               value: "production"
+            - name: WG_DEFAULT_ADDRESS
+              value: "2.44.x.x"
             - name: WG_PRE_UP
               value: sysctl net.ipv4.ip_forward=1
           ports:
