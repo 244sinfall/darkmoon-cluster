@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-world-worldserver
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker.dm
+      containers:
+        - name: worldserver
+          resources:
+            limits:
+              memory: 4Gi
+            requests:
+              memory: 512Mi

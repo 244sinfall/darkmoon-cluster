@@ -75,10 +75,8 @@ These show targeted `ignoreDifferences` for defaulted StatefulSet fields while k
 Before considering the change done, render the affected target locally:
 
 ```bash
-export SOPS_AGE_KEY_FILE=/home/dmitry/Dev/Personal/darkmoon-cluster/.local/sops/age-key.txt
-
-~/.local/bin/kustomize build --enable-alpha-plugins --enable-exec apps/<app>/overlays/<env>
-kubectl kustomize clusters/darkmoon/root
+source .venv/bin/activate && source .env && python scripts/render_cluster.py
+source .venv/bin/activate && source .env && python scripts/render_apps.py
 ```
 
 For more detail on current sync-safe patterns, read [references/sync-safe-patterns.md](references/sync-safe-patterns.md).

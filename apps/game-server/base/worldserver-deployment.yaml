@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-world-worldserver
+  labels:
+    app.kubernetes.io/name: dev-world-worldserver
+    app.kubernetes.io/part-of: game-server
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dev-world-worldserver
+      app.kubernetes.io/part-of: game-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dev-world-worldserver
+        app.kubernetes.io/part-of: game-server
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      volumes:
+        - name: cameras-volume
+          persistentVolumeClaim:
+            claimName: dev-world-cameras-pvc
+        - name: dbc-volume
+          persistentVolumeClaim:
+            claimName: dev-world-dbc-pvc
+        - name: gt-volume
+          persistentVolumeClaim:
+            claimName: dev-world-gt-pvc
+        - name: maps-volume
+          persistentVolumeClaim:
+            claimName: dev-world-maps-pvc
+        - name: vmaps-volume
+          persistentVolumeClaim:
+            claimName: dev-world-vmaps-pvc
+        - name: game-server-config
+          secret:
+            secretName: game-server-config
+            defaultMode: 0644
+      containers:
+        - name: worldserver
+          image: registryv2.rp-wow.ru/trinity-core:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - worldserver
+          args: []
+          ports:
+            - name: world-tcp
+              containerPort: 8085
+              protocol: TCP
+            - name: instance-tcp
+              containerPort: 8086
+              protocol: TCP
+            - name: telnet-tcp
+              containerPort: 3443
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: cameras-volume
+              mountPath: /usr/local/bin/cameras
+            - name: dbc-volume
+              mountPath: /usr/local/bin/dbc
+            - name: gt-volume
+              mountPath: /usr/local/bin/gt
+            - name: maps-volume
+              mountPath: /usr/local/bin/maps
+            - name: vmaps-volume
+              mountPath: /usr/local/bin/vmaps
+            - name: game-server-config
+              mountPath: /usr/local/etc/worldserver.conf
+              subPath: worldserver.conf

@@ -83,25 +83,34 @@ This is the preferred pattern for reusable `regcred`.
 2. Create a plain Secret manifest locally outside Git tracking.
 3. Encrypt it with `sops` using `--filename-override` for the final repo path.
 4. Add or update the KSOPS generator in the consuming Kustomization.
-5. Render with standalone `kustomize build --enable-alpha-plugins --enable-exec`.
+5. Render with the repo observation scripts.
 6. Only then wire the secret into workloads.
+
+For editing an existing secret, prefer:
+
+1. `source .venv/bin/activate && source .env && python scripts/flatten_secrets.py`
+2. Edit the decoded key files under `.local/tmp/secrets/<namespace>/<secret-name>/`.
+3. `source .venv/bin/activate && source .env && python scripts/reencrypt_secrets.py --dry-run`
+4. `source .venv/bin/activate && source .env && python scripts/reencrypt_secrets.py`
+5. Re-render with the repo observation scripts.
+
+The re-encrypt script maps flattened secrets back to their original
+KSOPS-managed `*.enc.yaml` sources and preserves shared namespace-agnostic
+secret structure by using the current encrypted file as a template.
 
 ## Commands
 
-Use the repo age key.
-
-For plain `sops` commands, relative paths may work.
-For local `kustomize` plus `ksops` rendering in this repo, use an absolute path:
+Use the repo-root `.env` for the age key and local tool paths.
 
 ```bash
-SOPS_AGE_KEY_FILE=/home/dmitry/Dev/Personal/darkmoon-cluster/.local/sops/age-key.txt
+source .env
 ```
 
 Encrypt an app secret:
 
 ```bash
-SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -e \
-  --filename-override /home/dmitry/Dev/Personal/darkmoon-cluster/apps/<app>/secrets/<name>.enc.yaml \
+source .env && sops -e \
+  --filename-override apps/<app>/secrets/<name>.enc.yaml \
   --output apps/<app>/secrets/<name>.enc.yaml \
   .local/secrets/<name>.yaml
 ```
@@ -109,8 +118,8 @@ SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -e \
 Encrypt a cluster secret:
 
 ```bash
-SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -e \
-  --filename-override /home/dmitry/Dev/Personal/darkmoon-cluster/clusters/darkmoon/config/secrets/<name>.enc.yaml \
+source .env && sops -e \
+  --filename-override clusters/darkmoon/config/secrets/<name>.enc.yaml \
   --output clusters/darkmoon/config/secrets/<name>.enc.yaml \
   .local/secrets/<name>.yaml
 ```
@@ -118,8 +127,9 @@ SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -e \
 Render locally:
 
 ```bash
-SOPS_AGE_KEY_FILE=.local/sops/age-key.txt \
-  kustomize build --enable-alpha-plugins --enable-exec apps/<app>/overlays/<env>
+source .venv/bin/activate && source .env && python scripts/render_cluster.py
+source .venv/bin/activate && source .env && python scripts/render_apps.py
+source .venv/bin/activate && source .env && python scripts/reencrypt_secrets.py --dry-run
 ```
 
 ## Repo patterns

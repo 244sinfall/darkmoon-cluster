@@ -36,7 +36,8 @@ The bootstrap model is simple:
 
 ## Local Verification
 
-Install standalone `kustomize` and `ksops` locally. The repo uses `ksops` exec plugins, so `kubectl kustomize` is not enough for secret-backed overlays.
+Install standalone `kustomize` and `ksops` locally. The repo uses `ksops` exec
+plugins, so `kubectl kustomize` is not enough for secret-backed overlays.
 
 ```bash
 mkdir -p ~/.local/bin /tmp/codex-install
@@ -59,16 +60,17 @@ tar -xzf ksops_4.4.0_Linux_x86_64.tar.gz
 install -m 0755 ksops ~/.local/bin/ksops
 ```
 
-Use an absolute age key path when rendering locally with `kustomize` plus `ksops`:
+Create `.env` from the repo example and set local paths there:
 
 ```bash
-export SOPS_AGE_KEY_FILE=/home/dmitry/Dev/Personal/darkmoon-cluster/.local/sops/age-key.txt
+cp .env.example .env
 ```
 
-Any change to app manifests, cluster config, Argo applications, or KSOPS-backed secrets should be rendered locally before it is considered done.
+Any change to app manifests, cluster config, Argo applications, or KSOPS-backed
+secrets should be rendered locally before it is considered done.
 
 ```bash
-~/.local/bin/kustomize build --enable-alpha-plugins --enable-exec apps/site/overlays/dev
-~/.local/bin/kustomize build --enable-alpha-plugins --enable-exec clusters/darkmoon/config
-kubectl kustomize clusters/darkmoon/root
+source .venv/bin/activate && source .env && python scripts/render_cluster.py
+source .venv/bin/activate && source .env && python scripts/flatten_secrets.py
+source .venv/bin/activate && source .env && python scripts/render_apps.py
 ```

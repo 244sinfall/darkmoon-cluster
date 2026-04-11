@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-world-worldserver
+  labels:
+    app.kubernetes.io/name: dev-world-worldserver
+    app.kubernetes.io/part-of: game-server
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: dev-world-worldserver
+    app.kubernetes.io/part-of: game-server
+  ports:
+    - name: world
+      port: 8085
+      targetPort: 8085
+      protocol: TCP
+    - name: instance
+      port: 8086
+      targetPort: 8086
+      protocol: TCP
+    - name: telnet
+      port: 3443
+      targetPort: 3443
+      protocol: TCP

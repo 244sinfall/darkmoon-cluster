@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-world-bnetserver
+  labels:
+    app.kubernetes.io/name: dev-world-bnetserver
+    app.kubernetes.io/part-of: game-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dev-world-bnetserver
+      app.kubernetes.io/part-of: game-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dev-world-bnetserver
+        app.kubernetes.io/part-of: game-server
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      volumes:
+        - name: bnetserver-tls
+          secret:
+            secretName: dev-world-bnetserver-tls-secret
+            defaultMode: 0400
+        - name: game-server-config
+          secret:
+            secretName: game-server-config
+            defaultMode: 0644
+      containers:
+        - name: bnetserver
+          image: registryv2.rp-wow.ru/trinity-core:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - bnetserver
+          args: []
+          ports:
+            - name: tcp
+              containerPort: 1119
+              protocol: TCP
+            - name: rest
+              containerPort: 8081
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: bnetserver-tls
+              mountPath: /usr/local/bin/bnetserver.cert.pem
+              subPath: tls.crt
+            - name: bnetserver-tls
+              mountPath: /usr/local/bin/bnetserver.key.pem
+              subPath: tls.key
+            - name: game-server-config
+              mountPath: /usr/local/etc/bnetserver.conf
+              subPath: bnetserver.conf

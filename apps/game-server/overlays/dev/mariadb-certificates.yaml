@@ -1,0 +1,66 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: dev-world-mariadb-selfsigned
+  labels:
+    app.kubernetes.io/name: dev-world-mariadb
+    app.kubernetes.io/part-of: game-server
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: dev-world-mariadb-ca
+  labels:
+    app.kubernetes.io/name: dev-world-mariadb
+    app.kubernetes.io/part-of: game-server
+spec:
+  secretName: dev-world-mariadb-ca-crt
+  commonName: dev-world-mariadb-ca
+  isCA: true
+  issuerRef:
+    name: dev-world-mariadb-selfsigned
+    kind: Issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: dev-world-mariadb-ca-issuer
+  labels:
+    app.kubernetes.io/name: dev-world-mariadb
+    app.kubernetes.io/part-of: game-server
+spec:
+  ca:
+    secretName: dev-world-mariadb-ca-crt
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: dev-world-mariadb
+  labels:
+    app.kubernetes.io/name: dev-world-mariadb
+    app.kubernetes.io/part-of: game-server
+spec:
+  secretName: dev-world-mariadb-crt
+  commonName: dev-world-mariadb.dev.svc.cluster.local
+  issuerRef:
+    name: dev-world-mariadb-ca-issuer
+    kind: Issuer
+  subject:
+    organizations:
+      - MariaDB
+  dnsNames:
+    - dev-world-mariadb
+    - dev-world-mariadb.dev
+    - dev-world-mariadb.dev.svc
+    - dev-world-mariadb.dev.svc.cluster.local
+    - dev-world-mariadb-0.dev-world-mariadb-headless
+    - dev-world-mariadb-0.dev-world-mariadb-headless.dev
+    - dev-world-mariadb-0.dev-world-mariadb-headless.dev.svc
+    - dev-world-mariadb-0.dev-world-mariadb-headless.dev.svc.cluster.local
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  duration: 2160h
+  renewBefore: 360h

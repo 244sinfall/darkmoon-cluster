@@ -17,7 +17,7 @@ The local private key for this workstation is expected at:
 
 That file is ignored by Git.
 
-The public key currently configured in [/.sops.yaml](/home/dmitry/Dev/Personal/darkmoon-cluster/.sops.yaml) is:
+The public key currently configured in [/.sops.yaml](../.sops.yaml) is:
 
 `age1rnfzyrzrlykyx2ak7jymfd6f4293e65kfchtgmrvuty6wl8dydeqqcnkg3`
 
@@ -37,19 +37,53 @@ Keep plain manifests out of Git once they contain real secret values.
 3. Commit only the `*.enc.yaml` file.
 4. Decrypt only when you need to inspect or edit values locally.
 
+## Flatten, Edit, Re-Encrypt
+
+For small secret edits, use the observation scripts instead of hand-editing
+base64 values:
+
+```bash
+source .venv/bin/activate && source .env && python scripts/flatten_secrets.py
+```
+
+Edit files under:
+
+```text
+.local/tmp/secrets/<namespace>/<secret-name>/
+```
+
+Each non-`metadata.yaml` file is one decoded secret key. Check the mapping back
+to encrypted sources before writing:
+
+```bash
+source .venv/bin/activate && source .env && python scripts/reencrypt_secrets.py --dry-run
+```
+
+Then re-encrypt the edited values:
+
+```bash
+source .venv/bin/activate && source .env && python scripts/reencrypt_secrets.py
+```
+
+The re-encrypt script uses each flattened secret's `metadata.yaml` source
+Application to find the original KSOPS-managed `*.enc.yaml`, decrypts that file
+as a template, replaces only Secret `data`, and runs `sops -e` back to the same
+path. That keeps shared namespace-agnostic secrets from accidentally gaining a
+rendered namespace.
+
 ## Commands
 
 Encrypt an already named file in place:
 
 ```bash
-SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -e -i clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml
+source .env && sops -e -i clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml
 ```
 
 Create a new encrypted file from a temporary plain manifest:
 
 ```bash
-SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -e \
-  --filename-override /home/dmitry/Dev/Personal/darkmoon-cluster/clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml \
+source .env && sops -e \
+  --filename-override clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml \
   --output clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml \
   .local/secrets/cloudflare-api-key.yaml
 ```
@@ -59,19 +93,19 @@ SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -e \
 Edit an encrypted file:
 
 ```bash
-SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml
+source .env && sops clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml
 ```
 
 View decrypted content without modifying:
 
 ```bash
-SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops -d clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml
+source .env && sops -d clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml
 ```
 
 Rotate encryption to the current `.sops.yaml` recipients:
 
 ```bash
-SOPS_AGE_KEY_FILE=.local/sops/age-key.txt sops updatekeys -y clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml
+source .env && sops updatekeys -y clusters/darkmoon/config/secrets/cloudflare-api-key.enc.yaml
 ```
 
 ## Backup rule

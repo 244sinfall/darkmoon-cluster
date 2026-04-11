@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: dev
+resources:
+  - ../../base
+  - ../../../_shared/image-pull-secret
+  - bnetserver-certificate.yaml
+  - mariadb-certificates.yaml
+  - mariadb-init-scripts.yaml
+  - mariadb-service.yaml
+  - mariadb-statefulset.yaml
+  - storage-pvcs.yaml
+generators:
+  - secret-generator.yaml
+replicas:
+  - name: dev-world-bnetserver
+    count: 1
+  - name: dev-world-worldserver
+    count: 1
+patches:
+  - path: bnetserver-dev-patch.yaml
+  - path: worldserver-dev-patch.yaml

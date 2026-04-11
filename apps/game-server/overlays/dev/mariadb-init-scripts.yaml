@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-world-mariadb-init-scripts
+  labels:
+    app.kubernetes.io/name: dev-world-mariadb
+    app.kubernetes.io/part-of: game-server
+data:
+  my_init_script.sql: |
+    CREATE DATABASE IF NOT EXISTS auth;
+    CREATE DATABASE IF NOT EXISTS characters;
+    CREATE DATABASE IF NOT EXISTS world;
+    CREATE DATABASE IF NOT EXISTS hotfixes;
+
+    GRANT ALL PRIVILEGES ON auth.* TO 'service'@'%';
+    GRANT ALL PRIVILEGES ON world.* TO 'service'@'%';
+    GRANT ALL PRIVILEGES ON characters.* TO 'service'@'%';
+    GRANT ALL PRIVILEGES ON hotfixes.* TO 'service'@'%';
+
+    FLUSH PRIVILEGES;

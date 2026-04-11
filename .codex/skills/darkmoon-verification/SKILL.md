@@ -1,11 +1,11 @@
 ---
 name: darkmoon-verification
-description: Use when changing Kubernetes manifests, Kustomizations, SOPS secrets, or Argo CD applications in this repository. Verify changes by rendering the affected target locally with standalone `kustomize` plus `ksops`, using the repo age key via an absolute `SOPS_AGE_KEY_FILE` path.
+description: Use when changing Kubernetes manifests, Kustomizations, SOPS secrets, Argo CD applications, or local observation scripts in this repository. Verify changes through the repo Python tooling after activating `.venv` and sourcing the repo-root `.env`.
 ---
 
 # Darkmoon Verification
 
-Any manifest or secret change must be rendered locally before it is considered done.
+Any manifest, secret, or observation script change must be rendered locally before it is considered done.
 
 ## Rule
 
@@ -15,35 +15,52 @@ After changing any of these:
 - `clusters/**`
 - shared secret packages under `apps/_shared/**`
 - encrypted secret files consumed by KSOPS
+- observation tooling under `scripts/**`
 
-render the affected target with standalone `kustomize` and `ksops`.
+render the local observation outputs through the repo Python scripts.
 
 Treat render failures as blocking.
 
 ## Commands
 
-Use the repo age key with an absolute path:
+Use the repo-root `.env` for local binary paths, KSOPS wiring, and the SOPS age key. Do not hardcode workstation home paths in verification commands.
+
+Render the cluster observation tree:
 
 ```bash
-export SOPS_AGE_KEY_FILE=/home/dmitry/Dev/Personal/darkmoon-cluster/.local/sops/age-key.txt
+source .venv/bin/activate && source .env && python scripts/render_cluster.py
 ```
 
-Render an app overlay:
+Render the flattened secret observation tree:
 
 ```bash
-~/.local/bin/kustomize build --enable-alpha-plugins --enable-exec apps/<app>/overlays/<env>
+source .venv/bin/activate && source .env && python scripts/flatten_secrets.py
 ```
 
-Render cluster config:
+Render the per-Application observation tree:
 
 ```bash
-~/.local/bin/kustomize build --enable-alpha-plugins --enable-exec clusters/darkmoon/config
+source .venv/bin/activate && source .env && python scripts/render_apps.py
 ```
 
-Render cluster root applications:
+If `.venv` does not exist or dependencies are missing, create/install them from the repo root:
 
 ```bash
-kubectl kustomize clusters/darkmoon/root
+python -m venv .venv
+source .venv/bin/activate && python -m pip install -r requirements.txt
+```
+
+The scripts render the Argo CD root plus local Application sources and write output under:
+
+- `.local/tmp/cluster`
+- `.local/tmp/secrets`
+- `.local/tmp/apps`
+
+When checking the re-encryption path, use dry-run mode unless the user explicitly
+wants encrypted secret files rewritten:
+
+```bash
+source .venv/bin/activate && source .env && python scripts/reencrypt_secrets.py --dry-run
 ```
 
 ## Current baseline
@@ -51,9 +68,7 @@ kubectl kustomize clusters/darkmoon/root
 Examples that should render locally:
 
 ```bash
-export SOPS_AGE_KEY_FILE=/home/dmitry/Dev/Personal/darkmoon-cluster/.local/sops/age-key.txt
-
-~/.local/bin/kustomize build --enable-alpha-plugins --enable-exec apps/site/overlays/dev
-~/.local/bin/kustomize build --enable-alpha-plugins --enable-exec clusters/darkmoon/config
-kubectl kustomize clusters/darkmoon/root
+source .venv/bin/activate && source .env && python scripts/render_cluster.py
+source .venv/bin/activate && source .env && python scripts/flatten_secrets.py
+source .venv/bin/activate && source .env && python scripts/render_apps.py
 ```

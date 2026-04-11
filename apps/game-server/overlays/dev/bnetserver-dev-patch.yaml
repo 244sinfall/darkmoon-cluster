@@ -1,0 +1,9 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-world-bnetserver
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker.dm
