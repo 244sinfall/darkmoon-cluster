@@ -3,7 +3,6 @@ kind: Kustomization
 namespace: dev
 resources:
   - ../../base
-  - ../../../_shared/image-pull-secret
   - bnetserver-certificate.yaml
   - mariadb-certificates.yaml
   - mariadb-init-scripts.yaml

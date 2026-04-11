@@ -27,8 +27,22 @@ Use encrypted secret files in one of these patterns:
 
 - `clusters/<cluster>/config/secrets/*.enc.yaml`
 - `apps/<app>/secrets/*.enc.yaml`
+- `apps/_shared/secrets/*.enc.yaml`
 
 Keep plain manifests out of Git once they contain real secret values.
+
+Shared namespace-scoped secrets, such as `regcred`, should have exactly one Argo
+CD owner per namespace. Keep the encrypted source namespace-agnostic under
+`apps/_shared/secrets/`, expose it through a shared package, then render it from
+a dedicated shared-secret Application such as:
+
+- `apps/_shared/overlays/dev/`
+- `clusters/darkmoon/root/applications/dev/shared-secrets.yaml`
+
+Workload Applications should reference the shared Secret by name, but should
+not include the shared package directly. Rendering the same live Secret from
+multiple Applications makes Argo CD tracking labels compete and causes
+OutOfSync drift.
 
 ## Typical workflow
 

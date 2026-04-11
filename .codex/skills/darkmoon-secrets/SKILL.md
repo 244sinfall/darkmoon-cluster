@@ -12,7 +12,8 @@ The target pattern is:
 - plaintext stays local only
 - Git stores only `*.enc.yaml`
 - Argo renders secrets through KSOPS
-- shared namespaced secrets reuse one encrypted source and let overlays apply namespace
+- shared namespaced secrets reuse one encrypted source and are rendered by a
+  dedicated shared-secret Argo CD Application per namespace
 
 ## Pick the right scope
 
@@ -59,12 +60,17 @@ Pattern:
 - keep one encrypted Secret manifest under `apps/_shared/secrets/`
 - omit `metadata.namespace`
 - expose it through a reusable Kustomize package under `apps/_shared/<component>/`
-- let the consuming overlay apply its namespace during render
+- include that package from `apps/_shared/overlays/<env>/`
+- render the overlay through one Argo CD Application such as `shared-secrets-dev`
+- make workload Applications depend on the shared Secret by sync wave and refer
+  to it by name, but do not include the shared package directly
 
 Example:
 
 - `apps/_shared/secrets/registry-pull-secret.enc.yaml`
 - `apps/_shared/image-pull-secret/`
+- `apps/_shared/overlays/dev/`
+- `clusters/darkmoon/root/applications/dev/shared-secrets.yaml`
 
 This is the preferred pattern for reusable `regcred`.
 
@@ -73,6 +79,8 @@ This is the preferred pattern for reusable `regcred`.
 - Never commit plaintext credentials or decrypted manifests.
 - Do not duplicate ciphertext per namespace unless values differ.
 - Keep secrets namespace-agnostic if they are meant to be reused across namespaces.
+- Do not render the same shared namespaced Secret from multiple workload
+  Applications; Argo CD tracking labels will compete and cause OutOfSync drift.
 - Keep cluster singletons in `clusters/darkmoon/config/secrets/`.
 - Keep app-owned secrets with the app even if only `dev` exists today.
 - Prefer stable secret names to avoid churn in mounts and references.

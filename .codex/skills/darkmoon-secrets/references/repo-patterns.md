@@ -41,29 +41,48 @@ Files:
 - `apps/_shared/secrets/registry-pull-secret.enc.yaml`
 - `apps/_shared/image-pull-secret/kustomization.yaml`
 - `apps/_shared/image-pull-secret/secret-generator.yaml`
+- `apps/_shared/overlays/dev/kustomization.yaml`
+- `clusters/darkmoon/root/applications/dev/shared-secrets.yaml`
 
 Shape:
 
 - one encrypted Secret manifest
 - no namespace in the encrypted source
 - one reusable Kustomize package exposes it
-- each consuming overlay includes that package and gets the secret in its own namespace
+- one shared overlay per environment applies the namespace
+- one Argo CD Application owns the rendered Secret for that namespace
+- workload Applications only reference the Secret by name
 
 This is the pattern to use for `regcred`.
 
-## Consumer pattern
+Do not include the shared package directly from multiple workload overlays. Argo
+CD will add different tracking labels for each Application and the Applications
+will compete over the same live Secret.
 
-App overlay:
+## Shared app pattern
+
+Shared overlay:
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: dev
 resources:
-  - ../../base
-  - ../../../_shared/image-pull-secret
-generators:
-  - secret-generator.yaml
+  - ../../image-pull-secret
+```
+
+Argo CD Application:
+
+```yaml
+metadata:
+  name: shared-secrets-dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  source:
+    path: apps/_shared/overlays/dev
+  destination:
+    namespace: dev
 ```
 
 Workload usage:

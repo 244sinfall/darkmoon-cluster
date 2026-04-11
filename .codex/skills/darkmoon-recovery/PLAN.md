@@ -214,7 +214,7 @@ Rules:
 - Separate shared infra assumptions from site-specific config.
 - If the site owns MySQL for `dev`, keep it with the app overlay for now rather than prematurely generalizing it.
 - Replace recovered `registry.rp-wow.ru/*` image references with `registryv2.rp-wow.ru/*` where the registry has already been migrated.
-- Use a shared namespace-agnostic SOPS-encrypted `regcred` secret as a single source of truth, then let each overlay apply its own namespace during render.
+- Use a shared namespace-agnostic SOPS-encrypted `regcred` secret as a single source of truth, then render it through one shared-secret Argo CD Application per namespace so workload Applications only reference it by name.
 
 ## 7. Recover backend services incrementally
 
