@@ -63,10 +63,54 @@ Do not:
 
 StatefulSets often drift on API-defaulted fields.
 
-Use the existing repo pattern:
+When adding a StatefulSet Application, start with explicit defaults in the
+manifest where that is meaningful. If Argo still reports drift on Kubernetes
+defaulted fields, add a targeted `ignoreDifferences` entry for that StatefulSet
+in the owning Application.
+
+Default-prone StatefulSet paths to consider:
+
+```yaml
+ignoreDifferences:
+  - group: apps
+    kind: StatefulSet
+    name: <statefulset-name>
+    namespace: <namespace>
+    jsonPointers:
+      - /metadata/labels/app.kubernetes.io~1instance
+      - /spec/persistentVolumeClaimRetentionPolicy
+      - /spec/podManagementPolicy
+      - /spec/revisionHistoryLimit
+      - /spec/template/metadata/creationTimestamp
+      - /spec/template/spec/containers/0/imagePullPolicy
+      - /spec/template/spec/containers/0/ports/0/protocol
+      - /spec/template/spec/containers/0/resources
+      - /spec/template/spec/containers/0/terminationMessagePath
+      - /spec/template/spec/containers/0/terminationMessagePolicy
+      - /spec/template/spec/dnsPolicy
+      - /spec/template/spec/restartPolicy
+      - /spec/template/spec/schedulerName
+      - /spec/template/spec/terminationGracePeriodSeconds
+      - /spec/updateStrategy
+      - /spec/volumeClaimTemplates/0/apiVersion
+      - /spec/volumeClaimTemplates/0/kind
+      - /spec/volumeClaimTemplates/0/metadata/creationTimestamp
+      - /spec/volumeClaimTemplates/0/spec/volumeMode
+      - /spec/volumeClaimTemplates/0/status
+```
+
+Add only paths that apply to the resource. Common optional additions:
+
+- `/spec/template/spec/securityContext` when the manifest intentionally leaves it empty and Kubernetes defaults it to `{}`
+- `/spec/template/spec/volumes/<index>/configMap/defaultMode` for ConfigMap volumes
+- `/spec/template/spec/volumes/<index>/secret/defaultMode` for Secret volumes
+- more `/spec/template/spec/containers/<index>/...` entries for multi-container StatefulSets
+
+Use the existing repo patterns:
 
 - `clusters/darkmoon/root/applications/core/nfs-server-provisioner.yaml`
 - `clusters/darkmoon/root/applications/dev/site.yaml`
+- `clusters/darkmoon/root/applications/dev/game-server.yaml`
 
 These show targeted `ignoreDifferences` for defaulted StatefulSet fields while keeping the actual workload spec under Git control.
 
