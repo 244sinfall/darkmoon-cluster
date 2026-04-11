@@ -1,0 +1,56 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vpn-default-allow-dm-infra
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: wg-rest-api
+      app.kubernetes.io/component: default
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 65.108.101.119/32
+        - ipBlock:
+            cidr: 135.125.233.102/32
+        - ipBlock:
+            cidr: 5.39.76.31/32
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vpn-internal-allow-cluster
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: wg-rest-api
+      app.kubernetes.io/component: internal
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.244.0.0/16
+        - ipBlock:
+            cidr: 10.0.0.0/8
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vpn-external-allow-external
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: wg-rest-api
+      app.kubernetes.io/component: external
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 10.244.0.0/16
