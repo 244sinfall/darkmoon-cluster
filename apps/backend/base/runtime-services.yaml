@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logs-service-api-rust-service
+  labels:
+    app.kubernetes.io/name: logs-service-api-rust-service
+    app.kubernetes.io/part-of: backend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: logs-service-api-rust-service
+    app.kubernetes.io/part-of: backend
+  ports:
+  - name: http
+    port: 3000
+    targetPort: http
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: referral-service-python-service
+  labels:
+    app.kubernetes.io/name: referral-service-python-service
+    app.kubernetes.io/part-of: backend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: referral-service-python-service
+    app.kubernetes.io/part-of: backend
+  ports:
+  - name: http
+    port: 8000
+    targetPort: http
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telnet-service-python-service
+  labels:
+    app.kubernetes.io/name: telnet-service-python-service
+    app.kubernetes.io/part-of: backend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: telnet-service-python-service
+    app.kubernetes.io/part-of: backend
+  ports:
+  - name: http
+    port: 8000
+    targetPort: http
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vpn-service-python-service
+  labels:
+    app.kubernetes.io/name: vpn-service-python-service
+    app.kubernetes.io/part-of: backend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: vpn-service-python-service
+    app.kubernetes.io/part-of: backend
+  ports:
+  - name: http
+    port: 3000
+    targetPort: http
+    protocol: TCP

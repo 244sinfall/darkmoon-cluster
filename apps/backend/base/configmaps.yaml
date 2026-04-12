@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-postgres-init-scripts
+  labels:
+    app.kubernetes.io/part-of: backend
+data:
+  01-init-backend.sh: |
+    #!/bin/sh
+    set -eu
+
+    create_user_and_database() {
+      user="$1"
+      database="$2"
+      password="$3"
+      psql --set=ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<SQL
+    DO \$\$
+    BEGIN
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '$user') THEN
+        CREATE ROLE $user LOGIN PASSWORD '$password';
+      ELSE
+        ALTER ROLE $user WITH PASSWORD '$password';
+      END IF;
+    END
+    \$\$;
+    SELECT 'CREATE DATABASE $database OWNER $user' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '$database')\gexec
+    GRANT ALL PRIVILEGES ON DATABASE $database TO $user;
+    SQL
+    }
+
+    create_user_and_database auth_service auth_service "$AUTH_SERVICE_POSTGRES_PASSWORD"
+    create_user_and_database characters_service characters_service "$CHARACTERS_SERVICE_POSTGRES_PASSWORD"
+    create_user_and_database claimed_items_service claimed_items_service "$CLAIMED_ITEMS_SERVICE_POSTGRES_PASSWORD"
+    create_user_and_database custom_npc_service custom_npc_service "$CUSTOM_NPC_SERVICE_POSTGRES_PASSWORD"
+    create_user_and_database launcher_service launcher_service "$LAUNCHER_SERVICE_POSTGRES_PASSWORD"
+    create_user_and_database logs_service logs_service "$LOGS_SERVICE_POSTGRES_PASSWORD"
+    create_user_and_database referral_service referral_service "$REFERRAL_SERVICE_POSTGRES_PASSWORD"
+    create_user_and_database telnet_service telnet_service "$TELNET_SERVICE_POSTGRES_PASSWORD"
+    create_user_and_database vpn_service vpn_service "$VPN_SERVICE_POSTGRES_PASSWORD"

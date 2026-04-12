@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: backend-dev
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  project: apps
+  source:
+    repoURL: git@github.com:244sinfall/darkmoon-cluster.git
+    targetRevision: HEAD
+    path: apps/backend/overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      name: backend-postgres
+      namespace: dev
+      jsonPointers:
+        - /metadata/labels/app.kubernetes.io~1instance
+        - /spec/template/metadata/creationTimestamp
+        - /spec/template/spec/containers/0/resources
+        - /spec/template/spec/securityContext
+        - /spec/volumeClaimTemplates/0/apiVersion
+        - /spec/volumeClaimTemplates/0/kind
+        - /spec/volumeClaimTemplates/0/metadata/creationTimestamp
+        - /spec/volumeClaimTemplates/0/status
+    - group: apps
+      kind: StatefulSet
+      name: rabbitmq
+      namespace: dev
+      jsonPointers:
+        - /metadata/labels/app.kubernetes.io~1instance
+        - /spec/template/metadata/creationTimestamp
+        - /spec/template/spec/containers/0/resources
+        - /spec/template/spec/securityContext
+        - /spec/volumeClaimTemplates/0/apiVersion
+        - /spec/volumeClaimTemplates/0/kind
+        - /spec/volumeClaimTemplates/0/metadata/creationTimestamp
+        - /spec/volumeClaimTemplates/0/status
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

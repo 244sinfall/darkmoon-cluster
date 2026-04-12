@@ -1,0 +1,450 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-master
+  labels:
+    app.kubernetes.io/name: redis-master
+    app.kubernetes.io/part-of: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis-master
+      app.kubernetes.io/part-of: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redis-master
+        app.kubernetes.io/part-of: backend
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 6379
+          protocol: TCP
+        resources: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logs-service-api-rust-service
+  labels:
+    app.kubernetes.io/name: logs-service-api-rust-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: logs-service-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: logs-service-api-rust-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: logs-service-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: logs-service-api-rust-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: logs-service-api
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: logs-service-api-rust-service
+        image: registryv2.rp-wow.ru/dm-logs-service-new:v0.2.2
+        imagePullPolicy: IfNotPresent
+        command:
+        - ./api
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        env:
+        - name: PSQL_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-api-rust-service.PSQL_ADDR
+        - name: REDIS_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-api-rust-service.REDIS_ADDR
+        - name: RMQ_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-api-rust-service.RMQ_ADDR
+        - name: DISCORD_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-api-rust-service.DISCORD_TOKEN
+        - name: DEFAULT_DISCORD_CHANNEL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-api-rust-service.DEFAULT_DISCORD_CHANNEL
+        resources: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logs-service-worker-rust-service
+  labels:
+    app.kubernetes.io/name: logs-service-worker-rust-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: logs-service-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: logs-service-worker-rust-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: logs-service-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: logs-service-worker-rust-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: logs-service-worker
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: logs-service-worker-rust-service
+        image: registryv2.rp-wow.ru/dm-logs-service-new:v0.2.2
+        imagePullPolicy: IfNotPresent
+        command:
+        - /usr/bin/sh
+        - -c
+        args:
+        - update-ca-certificates && ./worker
+        env:
+        - name: PSQL_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-worker-rust-service.PSQL_ADDR
+        - name: REDIS_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-worker-rust-service.REDIS_ADDR
+        - name: RMQ_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-worker-rust-service.RMQ_ADDR
+        - name: DISCORD_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-worker-rust-service.DISCORD_TOKEN
+        - name: DEFAULT_DISCORD_CHANNEL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-worker-rust-service.DEFAULT_DISCORD_CHANNEL
+        resources: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logs-service-bot-rust-service
+  labels:
+    app.kubernetes.io/name: logs-service-bot-rust-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: logs-service-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: logs-service-bot-rust-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: logs-service-bot
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: logs-service-bot-rust-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: logs-service-bot
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: logs-service-bot-rust-service
+        image: registryv2.rp-wow.ru/dm-logs-service-new:v0.2.2
+        imagePullPolicy: IfNotPresent
+        command:
+        - ./bot
+        env:
+        - name: PSQL_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-bot-rust-service.PSQL_ADDR
+        - name: REDIS_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-bot-rust-service.REDIS_ADDR
+        - name: RMQ_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-bot-rust-service.RMQ_ADDR
+        - name: DISCORD_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-bot-rust-service.DISCORD_TOKEN
+        - name: DEFAULT_DISCORD_CHANNEL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs-service-bot-rust-service.DEFAULT_DISCORD_CHANNEL
+        resources: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: referral-service-python-service
+  labels:
+    app.kubernetes.io/name: referral-service-python-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: referral-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: referral-service-python-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: referral-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: referral-service-python-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: referral-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: referral-service-python-service
+        image: registryv2.rp-wow.ru/darkmoon-referral-service:v0.1.12
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: referral-service-python-service.DATABASE_URL
+        - name: CHARACTER_SERVICE_BASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: referral-service-python-service.CHARACTER_SERVICE_BASE_URL
+        - name: TELNET_SERVICE_BASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: referral-service-python-service.TELNET_SERVICE_BASE_URL
+        resources: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telnet-service-python-service
+  labels:
+    app.kubernetes.io/name: telnet-service-python-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: telnet-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: telnet-service-python-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: telnet-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: telnet-service-python-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: telnet-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: telnet-service-python-service
+        image: registryv2.rp-wow.ru/darkmoon-telnet-service:v0.1.3
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: telnet-service-python-service.DATABASE_URL
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: telnet-service-python-service.REDIS_URL
+        resources: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telnet-service-worker-python-service
+  labels:
+    app.kubernetes.io/name: telnet-service-worker-python-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: telnet-service-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: telnet-service-worker-python-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: telnet-service-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: telnet-service-worker-python-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: telnet-service-worker
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: telnet-service-worker-python-service
+        image: registryv2.rp-wow.ru/darkmoon-telnet-service:v0.1.2
+        imagePullPolicy: Always
+        command:
+        - celery
+        - -A
+        - app.tasks
+        - worker
+        - --loglevel=info
+        - --pool=solo
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: telnet-service-worker-python-service.DATABASE_URL
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: telnet-service-worker-python-service.REDIS_URL
+        - name: TELNET_HOST
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: telnet-service-worker-python-service.TELNET_HOST
+        - name: TELNET_PORT
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: telnet-service-worker-python-service.TELNET_PORT
+        - name: TELNET_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: telnet-service-worker-python-service.TELNET_USERNAME
+        - name: TELNET_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: telnet-service-worker-python-service.TELNET_PASSWORD
+        resources: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vpn-service-python-service
+  labels:
+    app.kubernetes.io/name: vpn-service-python-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: vpn-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vpn-service-python-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: vpn-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: vpn-service-python-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: vpn-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: vpn-service-python-service
+        image: registryv2.rp-wow.ru/darkmoon-vpn-service:v0.1.4
+        imagePullPolicy: Always
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - alembic upgrade head && uvicorn vpn_service.main:app --host 0.0.0.0 --port 3000
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        env:
+        - name: VPN_BASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: vpn-service-python-service.VPN_BASE_URL
+        - name: VPN_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: vpn-service-python-service.VPN_AUTH_TOKEN
+        - name: VPN_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: vpn-service-python-service.VPN_ENDPOINT
+        - name: VPN_ALLOWED_IPS
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: vpn-service-python-service.VPN_ALLOWED_IPS
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: vpn-service-python-service.DATABASE_URL
+        - name: ALEMBIC_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: vpn-service-python-service.ALEMBIC_DATABASE_URL
+        - name: VPN_SCAN_INTERVAL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: vpn-service-python-service.VPN_SCAN_INTERVAL
+        resources: {}

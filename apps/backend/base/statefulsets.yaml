@@ -1,0 +1,208 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: backend-postgres
+  labels:
+    app.kubernetes.io/name: backend-postgres
+    app.kubernetes.io/part-of: backend
+spec:
+  serviceName: backend-postgres
+  replicas: 1
+  podManagementPolicy: OrderedReady
+  revisionHistoryLimit: 10
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backend-postgres
+      app.kubernetes.io/part-of: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: backend-postgres
+        app.kubernetes.io/part-of: backend
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      schedulerName: default-scheduler
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: postgres
+          containerPort: 5432
+          protocol: TCP
+        env:
+        - name: POSTGRES_DB
+          value: postgres
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: backend-postgres-password
+        - name: AUTH_SERVICE_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: auth_service-postgres-password
+        - name: CHARACTERS_SERVICE_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: characters_service-postgres-password
+        - name: CLAIMED_ITEMS_SERVICE_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: claimed_items_service-postgres-password
+        - name: CUSTOM_NPC_SERVICE_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: custom_npc_service-postgres-password
+        - name: LAUNCHER_SERVICE_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: launcher_service-postgres-password
+        - name: LOGS_SERVICE_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: logs_service-postgres-password
+        - name: REFERRAL_SERVICE_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: referral_service-postgres-password
+        - name: TELNET_SERVICE_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: telnet_service-postgres-password
+        - name: VPN_SERVICE_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: vpn_service-postgres-password
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+          subPath: pgdata
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: init-scripts
+        configMap:
+          name: backend-postgres-init-scripts
+          defaultMode: 365
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: nfs-shared
+      resources:
+        requests:
+          storage: 10Gi
+      volumeMode: Filesystem
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbitmq
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/part-of: backend
+spec:
+  serviceName: rabbitmq
+  replicas: 1
+  podManagementPolicy: OrderedReady
+  revisionHistoryLimit: 10
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rabbitmq
+      app.kubernetes.io/part-of: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rabbitmq
+        app.kubernetes.io/part-of: backend
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      schedulerName: default-scheduler
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3.13-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: amqp
+          containerPort: 5672
+          protocol: TCP
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: rabbitmq-default-user
+        - name: RABBITMQ_DEFAULT_PASS
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: rabbitmq-default-password
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - name: rabbitmq-data
+          mountPath: /var/lib/rabbitmq
+  volumeClaimTemplates:
+  - metadata:
+      name: rabbitmq-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: nfs-shared
+      resources:
+        requests:
+          storage: 2Gi
+      volumeMode: Filesystem

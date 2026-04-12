@@ -1,0 +1,426 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway-service-dotnet-service
+  labels:
+    app.kubernetes.io/name: api-gateway-service-dotnet-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: api-gateway-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api-gateway-service-dotnet-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: api-gateway-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: api-gateway-service-dotnet-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: api-gateway-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: api-gateway-service-dotnet-service
+        image: registryv2.rp-wow.ru/darkmoon-web-api-gateway-service:v0.1.22
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - name: appsettings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+      volumes:
+      - name: appsettings
+        secret:
+          secretName: backend-appsettings
+          defaultMode: 420
+          items:
+          - key: api-gateway-service-dotnet-service.appsettings.json
+            path: appsettings.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service-dotnet-service
+  labels:
+    app.kubernetes.io/name: auth-service-dotnet-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service-dotnet-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: auth-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-service-dotnet-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: auth-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: auth-service-dotnet-service
+        image: registryv2.rp-wow.ru/auth-service:v0.1.3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - name: appsettings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+      volumes:
+      - name: appsettings
+        secret:
+          secretName: backend-appsettings
+          defaultMode: 420
+          items:
+          - key: auth-service-dotnet-service.appsettings.json
+            path: appsettings.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: characters-service-dotnet-service
+  labels:
+    app.kubernetes.io/name: characters-service-dotnet-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: characters-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: characters-service-dotnet-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: characters-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: characters-service-dotnet-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: characters-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: characters-service-dotnet-service
+        image: registryv2.rp-wow.ru/characters-service:v0.1.3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - name: appsettings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+      volumes:
+      - name: appsettings
+        secret:
+          secretName: backend-appsettings
+          defaultMode: 420
+          items:
+          - key: characters-service-dotnet-service.appsettings.json
+            path: appsettings.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checks-service-dotnet-service
+  labels:
+    app.kubernetes.io/name: checks-service-dotnet-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: checks-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: checks-service-dotnet-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: checks-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: checks-service-dotnet-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: checks-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: checks-service-dotnet-service
+        image: registryv2.rp-wow.ru/checks-service:v0.1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - name: appsettings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+      volumes:
+      - name: appsettings
+        secret:
+          secretName: backend-appsettings
+          defaultMode: 420
+          items:
+          - key: checks-service-dotnet-service.appsettings.json
+            path: appsettings.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claimed-items-service-dotnet-service
+  labels:
+    app.kubernetes.io/name: claimed-items-service-dotnet-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: claimed-items-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: claimed-items-service-dotnet-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: claimed-items-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: claimed-items-service-dotnet-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: claimed-items-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: claimed-items-service-dotnet-service
+        image: registryv2.rp-wow.ru/claimed-items-service:v0.1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: CONFIG
+          value: /app/appsettings.json
+        resources: {}
+        volumeMounts:
+        - name: appsettings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+      volumes:
+      - name: appsettings
+        secret:
+          secretName: backend-appsettings
+          defaultMode: 420
+          items:
+          - key: claimed-items-service-dotnet-service.appsettings.json
+            path: appsettings.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: custom-npc-service-dotnet-service
+  labels:
+    app.kubernetes.io/name: custom-npc-service-dotnet-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: custom-npc-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: custom-npc-service-dotnet-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: custom-npc-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: custom-npc-service-dotnet-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: custom-npc-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: custom-npc-service-dotnet-service
+        image: registryv2.rp-wow.ru/custom-npc-service:v0.1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - name: appsettings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+      volumes:
+      - name: appsettings
+        secret:
+          secretName: backend-appsettings
+          defaultMode: 420
+          items:
+          - key: custom-npc-service-dotnet-service.appsettings.json
+            path: appsettings.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gm-service-dotnet-service
+  labels:
+    app.kubernetes.io/name: gm-service-dotnet-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: gm-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gm-service-dotnet-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: gm-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gm-service-dotnet-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: gm-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: gm-service-dotnet-service
+        image: registryv2.rp-wow.ru/gm-service:v0.1.1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - name: appsettings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+      volumes:
+      - name: appsettings
+        secret:
+          secretName: backend-appsettings
+          defaultMode: 420
+          items:
+          - key: gm-service-dotnet-service.appsettings.json
+            path: appsettings.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: launcher-service-dotnet-service
+  labels:
+    app.kubernetes.io/name: launcher-service-dotnet-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: launcher-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: launcher-service-dotnet-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: launcher-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: launcher-service-dotnet-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: launcher-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: launcher-service-dotnet-service
+        image: registryv2.rp-wow.ru/launcher-service:v1.0.1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - name: appsettings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+      volumes:
+      - name: appsettings
+        secret:
+          secretName: backend-appsettings
+          defaultMode: 420
+          items:
+          - key: launcher-service-dotnet-service.appsettings.json
+            path: appsettings.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poi-service-dotnet-service
+  labels:
+    app.kubernetes.io/name: poi-service-dotnet-service
+    app.kubernetes.io/part-of: backend
+    app.kubernetes.io/component: poi-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: poi-service-dotnet-service
+      app.kubernetes.io/part-of: backend
+      app.kubernetes.io/component: poi-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: poi-service-dotnet-service
+        app.kubernetes.io/part-of: backend
+        app.kubernetes.io/component: poi-service
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: poi-service-dotnet-service
+        image: registryv2.rp-wow.ru/poi-service:v0.1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - name: appsettings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+      volumes:
+      - name: appsettings
+        secret:
+          secretName: backend-appsettings
+          defaultMode: 420
+          items:
+          - key: poi-service-dotnet-service.appsettings.json
+            path: appsettings.json
