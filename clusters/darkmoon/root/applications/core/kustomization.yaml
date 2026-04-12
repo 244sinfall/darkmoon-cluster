@@ -7,5 +7,6 @@ resources:
   - docker-registry.yaml
   - ingress-nginx.yaml
   - local-path-provisioner.yaml
+  - litellm.yaml
   - nfs-server-provisioner.yaml
   - vpn.yaml

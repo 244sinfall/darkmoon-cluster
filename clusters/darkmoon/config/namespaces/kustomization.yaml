@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - dev.yaml
   - local-path-storage.yaml
+  - llm-provider.yaml
   - nfs-storage.yaml
   - stage.yaml
   - prod.yaml

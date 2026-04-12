@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: litellm-postgres
+  labels:
+    app.kubernetes.io/name: litellm-postgres
+    app.kubernetes.io/part-of: litellm
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/name: litellm-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+      protocol: TCP
