@@ -139,7 +139,11 @@ spec:
             - name: ENVIRONMENT
               value: "production"
             - name: WG_DEFAULT_ADDRESS
-              value: "2.44.x.x"
+              value: "172.31.244.x"
+            - name: WG_ALLOWED_IPS
+              value: "0.0.0.0/0"
+            - name: WG_DEFAULT_DNS
+              value: "1.1.1.1, 8.8.8.8"
             - name: WG_PRE_UP
               value: sysctl net.ipv4.ip_forward=1
           ports:
