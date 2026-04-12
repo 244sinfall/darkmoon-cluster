@@ -4,6 +4,7 @@ namespace: dev
 resources:
   - ../../base
   - ingress.yaml
+  - rabbitmq-certificates.yaml
 generators:
   - secret-generator.yaml
 replicas:

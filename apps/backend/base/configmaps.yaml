@@ -38,3 +38,20 @@ data:
     create_user_and_database referral_service referral_service "$REFERRAL_SERVICE_POSTGRES_PASSWORD"
     create_user_and_database telnet_service telnet_service "$TELNET_SERVICE_POSTGRES_PASSWORD"
     create_user_and_database vpn_service vpn_service "$VPN_SERVICE_POSTGRES_PASSWORD"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-config
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/part-of: backend
+data:
+  rabbitmq.conf: |
+    listeners.tcp = none
+    listeners.ssl.default = 5671
+    ssl_options.cacertfile = /etc/rabbitmq/tls/ca.crt
+    ssl_options.certfile = /etc/rabbitmq/tls/tls.crt
+    ssl_options.keyfile = /etc/rabbitmq/tls/tls.key
+    ssl_options.verify = verify_none
+    ssl_options.fail_if_no_peer_cert = false

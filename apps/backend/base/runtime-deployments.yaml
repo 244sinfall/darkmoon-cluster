@@ -59,7 +59,10 @@ spec:
         image: registryv2.rp-wow.ru/dm-logs-service-new:v0.2.2
         imagePullPolicy: IfNotPresent
         command:
-        - ./api
+        - /usr/bin/sh
+        - -c
+        args:
+        - update-ca-certificates && ./api
         ports:
         - name: http
           containerPort: 3000
@@ -91,6 +94,16 @@ spec:
               name: backend-env
               key: logs-service-api-rust-service.DEFAULT_DISCORD_CHANNEL
         resources: {}
+        volumeMounts:
+        - name: rabbit-ca
+          mountPath: /usr/local/share/ca-certificates/rabbit-ca.crt
+          subPath: ca.crt
+          readOnly: true
+      volumes:
+      - name: rabbit-ca
+        secret:
+          secretName: rabbitmq-certs
+          defaultMode: 420
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -152,6 +165,16 @@ spec:
               name: backend-env
               key: logs-service-worker-rust-service.DEFAULT_DISCORD_CHANNEL
         resources: {}
+        volumeMounts:
+        - name: rabbit-ca
+          mountPath: /usr/local/share/ca-certificates/rabbit-ca.crt
+          subPath: ca.crt
+          readOnly: true
+      volumes:
+      - name: rabbit-ca
+        secret:
+          secretName: rabbitmq-certs
+          defaultMode: 420
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -182,7 +205,10 @@ spec:
         image: registryv2.rp-wow.ru/dm-logs-service-new:v0.2.2
         imagePullPolicy: IfNotPresent
         command:
-        - ./bot
+        - /usr/bin/sh
+        - -c
+        args:
+        - update-ca-certificates && ./bot
         env:
         - name: PSQL_ADDR
           valueFrom:
@@ -210,6 +236,16 @@ spec:
               name: backend-env
               key: logs-service-bot-rust-service.DEFAULT_DISCORD_CHANNEL
         resources: {}
+        volumeMounts:
+        - name: rabbit-ca
+          mountPath: /usr/local/share/ca-certificates/rabbit-ca.crt
+          subPath: ca.crt
+          readOnly: true
+      volumes:
+      - name: rabbit-ca
+        secret:
+          secretName: rabbitmq-certs
+          defaultMode: 420
 ---
 apiVersion: apps/v1
 kind: Deployment
