@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/component: default
 spec:
   type: NodePort
+  externalTrafficPolicy: Local
   selector:
     app.kubernetes.io/name: wg-rest-api
     app.kubernetes.io/component: default
@@ -47,6 +48,7 @@ metadata:
     app.kubernetes.io/component: internal
 spec:
   type: NodePort
+  externalTrafficPolicy: Local
   selector:
     app.kubernetes.io/name: wg-rest-api
     app.kubernetes.io/component: internal
@@ -86,6 +88,7 @@ metadata:
     app.kubernetes.io/component: external
 spec:
   type: NodePort
+  externalTrafficPolicy: Local
   selector:
     app.kubernetes.io/name: wg-rest-api
     app.kubernetes.io/component: external
