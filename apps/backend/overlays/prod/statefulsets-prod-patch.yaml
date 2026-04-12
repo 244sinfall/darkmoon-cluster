@@ -7,6 +7,9 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: rpwowru
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
   volumeClaimTemplates:
     - metadata:
         name: postgres-data
