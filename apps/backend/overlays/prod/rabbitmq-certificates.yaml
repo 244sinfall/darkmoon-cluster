@@ -1,0 +1,66 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: backend-rabbitmq-selfsigned
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/part-of: backend
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: backend-rabbitmq-ca
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/part-of: backend
+spec:
+  secretName: backend-rabbitmq-ca-crt
+  commonName: backend-rabbitmq-ca
+  isCA: true
+  issuerRef:
+    name: backend-rabbitmq-selfsigned
+    kind: Issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: backend-rabbitmq-ca-issuer
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/part-of: backend
+spec:
+  ca:
+    secretName: backend-rabbitmq-ca-crt
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rabbitmq
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/part-of: backend
+spec:
+  secretName: rabbitmq-certs
+  commonName: rabbitmq.prod.svc.cluster.local
+  issuerRef:
+    name: backend-rabbitmq-ca-issuer
+    kind: Issuer
+  subject:
+    organizations:
+      - Darkmoon Backend
+  dnsNames:
+    - rabbitmq
+    - rabbitmq.prod
+    - rabbitmq.prod.svc
+    - rabbitmq.prod.svc.cluster.local
+    - rabbitmq-0.rabbitmq
+    - rabbitmq-0.rabbitmq.prod
+    - rabbitmq-0.rabbitmq.prod.svc
+    - rabbitmq-0.rabbitmq.prod.svc.cluster.local
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  duration: 2160h
+  renewBefore: 360h
