@@ -29,7 +29,6 @@ spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       nodeSelector:
-        kubernetes.io/hostname: worker.dm
         kubernetes.io/os: linux
       terminationGracePeriodSeconds: 300
       containers:
