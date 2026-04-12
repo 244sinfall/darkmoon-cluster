@@ -157,7 +157,7 @@ def decrypt_secret(settings, encrypted_path: Path) -> dict[str, Any]:
 def apply_flattened_values(secret: dict[str, Any], secret_dir: Path) -> dict[str, Any]:
     metadata_file = secret_dir / "metadata.yaml"
     values = {
-        path.name: base64.b64encode(path.read_bytes()).decode("ascii")
+        path.name: base64.b64encode(read_flattened_value(path)).decode("ascii")
         for path in sorted(secret_dir.iterdir())
         if path.is_file() and path != metadata_file
     }
@@ -165,6 +165,10 @@ def apply_flattened_values(secret: dict[str, Any], secret_dir: Path) -> dict[str
     updated.pop("stringData", None)
     updated["data"] = values
     return updated
+
+
+def read_flattened_value(path: Path) -> bytes:
+    return path.read_bytes().rstrip(b"\r\n")
 
 
 def encrypt_secret(settings, secret: dict[str, Any], target_path: Path) -> None:
