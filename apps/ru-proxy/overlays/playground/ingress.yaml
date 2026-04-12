@@ -7,7 +7,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: ruv2.rp-wow.ru
+    - host: ru.rp-wow.ru
       http:
         paths:
           - path: /
@@ -19,5 +19,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - ruv2.rp-wow.ru
-      secretName: ruv2-rp-wow-ru-tls
+        - ru.rp-wow.ru
+      secretName: ru-rp-wow-ru-tls
