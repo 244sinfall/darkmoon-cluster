@@ -10,3 +10,5 @@ generators:
 replicas:
   - name: api-gateway-service-dotnet-service
     count: 1
+patches:
+  - path: rabbitmq-vhost-dev-patch.yaml
