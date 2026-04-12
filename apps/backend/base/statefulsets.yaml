@@ -34,6 +34,9 @@ spec:
       - name: postgres
         image: postgres:15-alpine
         imagePullPolicy: IfNotPresent
+        args:
+        - -c
+        - listen_addresses=*
         ports:
         - name: postgres
           containerPort: 5432
@@ -48,6 +51,10 @@ spec:
             secretKeyRef:
               name: backend-env
               key: backend-postgres-password
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         - name: AUTH_SERVICE_POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -96,9 +103,9 @@ spec:
         readinessProbe:
           exec:
             command:
-            - pg_isready
-            - -U
-            - postgres
+            - sh
+            - -ec
+            - pg_isready -h "$POD_IP" -p 5432 -U postgres
           initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 5
@@ -106,9 +113,9 @@ spec:
         livenessProbe:
           exec:
             command:
-            - pg_isready
-            - -U
-            - postgres
+            - sh
+            - -ec
+            - pg_isready -h "$POD_IP" -p 5432 -U postgres
           initialDelaySeconds: 30
           periodSeconds: 20
           timeoutSeconds: 5
