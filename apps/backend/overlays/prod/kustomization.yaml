@@ -4,6 +4,7 @@ namespace: prod
 resources:
   - ../../base
   - ingress.yaml
+  - ru-ingress.yaml
   - rabbitmq-certificates.yaml
 generators:
   - secret-generator.yaml

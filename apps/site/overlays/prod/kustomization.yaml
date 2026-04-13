@@ -5,6 +5,7 @@ resources:
   - ../../base
   - config-files.yaml
   - ingress.yaml
+  - ru-ingress.yaml
   - mysql-service.yaml
   - mysql-statefulset.yaml
   - storage-pvcs.yaml
