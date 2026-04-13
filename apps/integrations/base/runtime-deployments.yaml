@@ -26,7 +26,7 @@ spec:
         - name: regcred
       containers:
         - name: wtools-integration-service
-          image: registry.rp-wow.ru/darkmoon-wtools-integration-service:v1.0.0
+          image: registryv2.rp-wow.ru/darkmoon-wtools-integration-service:v1.0.0
           command: ["dotnet", "wow.tools.local.dll"]
           volumeMounts:
             - name: wowclient-volume
@@ -78,7 +78,7 @@ spec:
         - name: regcred
       containers:
         - name: wapi-backend
-          image: registry.rp-wow.ru/wapi-integration-service-backend:v1.0.0
+          image: registryv2.rp-wow.ru/wapi-integration-service-backend:v1.0.0
           ports:
             - containerPort: 4000
           env:
@@ -130,7 +130,7 @@ spec:
         - name: regcred
       containers:
         - name: wapi-frontend
-          image: registry.rp-wow.ru/wapi-integration-service-frontend:v1.0.0
+          image: registryv2.rp-wow.ru/wapi-integration-service-frontend:v1.0.0
           ports:
             - containerPort: 3000
           env:
