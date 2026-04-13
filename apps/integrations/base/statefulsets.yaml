@@ -32,7 +32,7 @@ spec:
       schedulerName: default-scheduler
       containers:
         - name: postgres
-          image: postgres:15-alpine
+          image: postgres:17-alpine
           imagePullPolicy: IfNotPresent
           args:
             - -c
