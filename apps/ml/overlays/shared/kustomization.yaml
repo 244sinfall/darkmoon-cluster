@@ -8,8 +8,8 @@ generators:
   - secret-generator.yaml
 replicas:
   - name: qdrant
-    count: 0
+    count: 1
   - name: dm-agent
-    count: 0
+    count: 1
   - name: cross-encoder-reranker
-    count: 0
+    count: 1
