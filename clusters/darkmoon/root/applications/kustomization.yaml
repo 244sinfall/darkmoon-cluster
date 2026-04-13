@@ -4,7 +4,6 @@ resources:
   - core
   - dev
   - prod
-  - playground
 
 patches:
   # Preserve manual scaling even when an Application syncs for unrelated drift.
@@ -20,7 +19,7 @@ patches:
       group: argoproj.io
       version: v1alpha1
       kind: Application
-      name: '^(cluster-config|litellm|nfs-server-provisioner|backend-dev|game-server-dev|site-dev|backend-prod|integrations-prod|site-prod)$'
+      name: "^(cluster-config|litellm|nfs-server-provisioner|backend-dev|game-server-dev|site-dev|backend-prod|integrations-prod|site-prod)$"
     patch: |-
       - op: add
         path: /spec/ignoreDifferences/-
@@ -40,7 +39,7 @@ patches:
       group: argoproj.io
       version: v1alpha1
       kind: Application
-      name: '^(cert-manager|docker-registry|docker-registry-ui|ingress-nginx|local-path-provisioner|vpn|shared-secrets-dev|shared-secrets-prod|shared-secrets-prod-integrations|ru-proxy|test-echo)$'
+      name: "^(cert-manager|docker-registry|docker-registry-ui|ingress-nginx|local-path-provisioner|vpn|shared-secrets-dev|shared-secrets-prod|shared-secrets-prod-integrations|ru-proxy|test-echo)$"
     patch: |-
       - op: add
         path: /spec/ignoreDifferences
