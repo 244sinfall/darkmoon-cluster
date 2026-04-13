@@ -9,3 +9,4 @@ resources:
   - prod.yaml
   - playground.yaml
   - registry.yaml
+  - prod-integrations.yaml
