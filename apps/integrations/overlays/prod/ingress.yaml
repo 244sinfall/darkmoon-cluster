@@ -42,6 +42,10 @@ spec:
                 name: wapi-integration-service-backend
                 port:
                   number: 4000
+  tls:
+    - hosts:
+        - wapi.rp-wow.ru
+      secretName: wapi-tls
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
