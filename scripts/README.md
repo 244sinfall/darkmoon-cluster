@@ -53,8 +53,9 @@ Renders the same Argo CD graph and writes only decoded secrets under:
 ```
 
 Each secret folder contains `metadata.yaml` plus one file per secret key. Secret
-`data` values are written as decoded bytes; `stringData` values are written as
-UTF-8 text.
+`data` and `stringData` values are written as decoded bytes. The metadata keeps
+the KSOPS source path, generator path, preferred `data`/`stringData` field, and
+a `keys` map from safe local filenames back to Kubernetes Secret keys.
 
 Run it with:
 
@@ -91,10 +92,19 @@ Reads edited flattened secrets from:
 ```
 
 Then maps each secret back to its original KSOPS-managed `*.enc.yaml` source,
-replaces only the Secret `data` values, and re-encrypts that source with `sops`.
+replaces only the Secret values, and re-encrypts that source with `sops`.
 The script decrypts the current encrypted file as a template first, so shared
 namespace-agnostic secrets stay namespace-agnostic even when their flattened
 render lives under a concrete namespace.
+
+If a flattened `metadata.yaml` points `source.encryptedPath` at a new
+`*.enc.yaml`, the script creates that encrypted file and appends it to
+`source.generatorPath`. This lets you add a secret by copying a nearby flattened
+folder, changing `metadata.name` and `source.encryptedPath`, editing the key
+files, and running `reencrypt_secrets.py`.
+
+Unchanged flattened values are skipped, so a fresh flatten followed by a dry
+run should not rewrite every encrypted file.
 
 Check the mapping without writing encrypted files:
 

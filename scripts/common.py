@@ -77,6 +77,35 @@ class LocalApplication:
     destination_namespace: str | None
 
 
+@dataclass(frozen=True)
+class KsopsFileReference:
+    encrypted_path: Path
+    generator_path: Path
+    generator_file: str
+
+
+@dataclass(frozen=True)
+class SecretSourceReference:
+    encrypted_path: Path
+    generator_path: Path
+    generator_file: str
+    secret: dict[str, Any]
+
+
+class _YamlDumper(yaml.SafeDumper):
+    def increase_indent(self, flow=False, indentless=False):  # type: ignore[no-untyped-def]
+        return super().increase_indent(flow, False)
+
+
+def _represent_yaml_string(dumper: yaml.SafeDumper, value: str) -> yaml.nodes.ScalarNode:
+    if "\n" in value:
+        return dumper.represent_scalar("tag:yaml.org,2002:str", value, style="|")
+    return dumper.represent_scalar("tag:yaml.org,2002:str", value)
+
+
+_YamlDumper.add_representer(str, _represent_yaml_string)
+
+
 def load_dotenv() -> None:
     """Load simple KEY=VALUE files without adding a runtime dependency."""
     env_file = REPO_ROOT / ".env"
@@ -238,6 +267,105 @@ def build_kustomize(settings: Settings, path: str) -> list[dict[str, Any]]:
     return [doc for doc in yaml.safe_load_all(result.stdout) if isinstance(doc, dict)]
 
 
+def build_secret_source_index(
+    settings: Settings,
+    root_docs: Iterable[dict[str, Any]] | None = None,
+) -> dict[tuple[str, str], SecretSourceReference]:
+    index: dict[tuple[str, str], SecretSourceReference] = {}
+    for app in local_applications(settings, root_docs):
+        ksops_files = collect_ksops_files(settings.repo_root / app.source_path)
+        if not ksops_files:
+            continue
+
+        secret_sources: dict[str, SecretSourceReference] = {}
+        for ksops_file in ksops_files:
+            secret = decrypt_secret_source(settings, ksops_file.encrypted_path)
+            name = secret.get("metadata", {}).get("name")
+            if not name:
+                continue
+            if name in secret_sources:
+                raise RuntimeError(f"Duplicate secret name {name} in Application {app.name}")
+            secret_sources[str(name)] = SecretSourceReference(
+                encrypted_path=ksops_file.encrypted_path,
+                generator_path=ksops_file.generator_path,
+                generator_file=ksops_file.generator_file,
+                secret=secret,
+            )
+
+        for doc in build_kustomize(settings, app.source_path):
+            if is_kubernetes_object(doc) and doc.get("kind") == "Secret":
+                rendered_name = str(doc.get("metadata", {}).get("name"))
+                source_ref = secret_sources.get(rendered_name)
+                if source_ref is None:
+                    continue
+                key = (app.name, rendered_name)
+                existing = index.get(key)
+                if existing is not None and existing.encrypted_path != source_ref.encrypted_path:
+                    raise RuntimeError(f"Ambiguous encrypted source for {app.name}/{rendered_name}")
+                index[key] = source_ref
+    return index
+
+
+def collect_ksops_files(root: Path) -> list[KsopsFileReference]:
+    seen: set[Path] = set()
+    encrypted_files: list[KsopsFileReference] = []
+    visit_kustomization(root, seen, encrypted_files)
+    return encrypted_files
+
+
+def visit_kustomization(path: Path, seen: set[Path], encrypted_files: list[KsopsFileReference]) -> None:
+    path = path.resolve()
+    if path in seen or not path.exists():
+        return
+    seen.add(path)
+
+    kustomization = path / "kustomization.yaml"
+    if not kustomization.exists():
+        return
+    doc = read_yaml(kustomization)
+
+    for generator in doc.get("generators") or []:
+        generator_path = (path / str(generator)).resolve()
+        if not generator_path.exists():
+            continue
+        generator_doc = read_yaml(generator_path)
+        if generator_doc.get("kind") != "ksops":
+            continue
+        files = generator_doc.get("files") or []
+        if not isinstance(files, list):
+            raise RuntimeError(f"KSOPS files must be a list: {display_path(generator_path, REPO_ROOT)}")
+        for encrypted_file in files:
+            encrypted_files.append(
+                KsopsFileReference(
+                    encrypted_path=(generator_path.parent / str(encrypted_file)).resolve(),
+                    generator_path=generator_path,
+                    generator_file=str(encrypted_file),
+                )
+            )
+
+    for resource in doc.get("resources") or []:
+        resource_path = (path / str(resource)).resolve()
+        if resource_path.is_dir():
+            visit_kustomization(resource_path, seen, encrypted_files)
+
+
+def decrypt_secret_source(settings: Settings, encrypted_path: Path) -> dict[str, Any]:
+    result = subprocess.run(
+        [settings.sops_bin, "-d", str(encrypted_path)],
+        cwd=settings.repo_root,
+        env=command_env(settings),
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"sops decrypt failed for {display_path(encrypted_path, settings.repo_root)}\n{result.stderr}")
+    doc = yaml.safe_load(result.stdout)
+    if not isinstance(doc, dict) or doc.get("kind") != "Secret":
+        raise RuntimeError(f"Decrypted file is not a Secret: {display_path(encrypted_path, settings.repo_root)}")
+    return doc
+
+
 def is_kubernetes_object(doc: dict[str, Any]) -> bool:
     return bool(doc.get("apiVersion") and doc.get("kind") and doc.get("metadata", {}).get("name"))
 
@@ -274,7 +402,12 @@ def unique_yaml_path(directory: Path, name: str, source_name: str) -> Path:
 
 def write_yaml(path: Path, doc: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
+    path.write_text(yaml.dump(doc, Dumper=_YamlDumper, sort_keys=False), encoding="utf-8")
+
+
+def read_yaml(path: Path) -> dict[str, Any]:
+    doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return doc if isinstance(doc, dict) else {}
 
 
 def decode_secret_for_yaml(secret: dict[str, Any]) -> dict[str, Any]:
@@ -327,6 +460,12 @@ def secret_string_data(secret: dict[str, Any]) -> dict[str, str]:
     if not isinstance(string_data, dict):
         return {}
     return {str(key): str(value) for key, value in string_data.items()}
+
+
+def secret_value_field(secret: dict[str, Any]) -> str:
+    if secret.get("stringData") and not secret.get("data"):
+        return "stringData"
+    return "data"
 
 
 def _applications(docs: Iterable[dict[str, Any]]) -> Iterable[dict[str, Any]]:

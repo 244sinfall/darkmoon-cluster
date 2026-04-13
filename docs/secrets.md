@@ -66,8 +66,10 @@ Edit files under:
 .local/tmp/secrets/<namespace>/<secret-name>/
 ```
 
-Each non-`metadata.yaml` file is one decoded secret key. Check the mapping back
-to encrypted sources before writing:
+Each non-`metadata.yaml` file is one decoded secret key. `metadata.yaml` records
+the encrypted source path, KSOPS generator path, preferred value field, and a
+`keys` map for local filenames that cannot exactly match the Kubernetes Secret
+key. Check the mapping back to encrypted sources before writing:
 
 ```bash
 source .venv/bin/activate && source .env && python scripts/reencrypt_secrets.py --dry-run
@@ -81,9 +83,10 @@ source .venv/bin/activate && source .env && python scripts/reencrypt_secrets.py
 
 The re-encrypt script uses each flattened secret's `metadata.yaml` source
 Application to find the original KSOPS-managed `*.enc.yaml`, decrypts that file
-as a template, replaces only Secret `data`, and runs `sops -e` back to the same
+as a template, replaces only Secret values, and runs `sops -e` back to the same
 path. That keeps shared namespace-agnostic secrets from accidentally gaining a
-rendered namespace.
+rendered namespace. If `source.encryptedPath` points at a new `*.enc.yaml`, the
+script creates it and adds it to `source.generatorPath`.
 
 ## Commands
 
