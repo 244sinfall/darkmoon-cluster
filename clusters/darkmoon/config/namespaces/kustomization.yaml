@@ -4,6 +4,7 @@ resources:
   - dev.yaml
   - local-path-storage.yaml
   - llm-provider.yaml
+  - ml.yaml
   - nfs-storage.yaml
   - stage.yaml
   - prod.yaml

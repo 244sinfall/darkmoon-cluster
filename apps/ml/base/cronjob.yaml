@@ -1,0 +1,97 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dm-agent-cleanup
+  labels:
+    app.kubernetes.io/name: dm-agent-cleanup
+    app.kubernetes.io/part-of: ml
+spec:
+  schedule: "0 2 * * 0" # Every Sunday at 2 AM UTC
+  concurrencyPolicy: Forbid # Don't run if previous job is still running
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: dm-agent-cleanup
+            app.kubernetes.io/part-of: ml
+        spec:
+          restartPolicy: OnFailure
+          imagePullSecrets:
+            - name: regcred
+          containers:
+            - name: cleanup
+              image: registryv2.rp-wow.ru/dm-gpt-agent:v0.1.15
+              imagePullPolicy: IfNotPresent
+              command:
+                - cleanup
+                - --hours
+                - "168" # 7 days (can be overridden by env var)
+              envFrom:
+                - configMapRef:
+                    name: dm-agent-config
+                - secretRef:
+                    name: dm-agent-secrets
+              resources:
+                requests:
+                  memory: "128Mi"
+                  cpu: "100m"
+                limits:
+                  memory: "512Mi"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: site-ai-indexer
+  labels:
+    app.kubernetes.io/name: site-ai-indexer
+    app.kubernetes.io/part-of: ml
+spec:
+  # Run once a week on Sunday at 02:00 UTC
+  schedule: "0 2 */2 * *"
+  # Keep last 3 successful jobs
+  successfulJobsHistoryLimit: 3
+  # Keep last 1 failed job for debugging
+  failedJobsHistoryLimit: 1
+  # Don't start new job if previous is still running
+  concurrencyPolicy: Forbid
+  #  imagePullSecrets:
+  #    - name: regcred
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 72000 # 20 hour timeout
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: site-ai-indexer
+            app.kubernetes.io/part-of: ml
+        spec:
+          restartPolicy: OnFailure
+          imagePullSecrets:
+            - name: regcred
+          containers:
+            - name: indexer
+              image: registryv2.rp-wow.ru/dm-gpt-indexer:v0.1.5
+              imagePullPolicy: IfNotPresent
+              envFrom:
+                - configMapRef:
+                    name: indexer-config
+                - secretRef:
+                    name: indexer-secrets
+              volumeMounts:
+                - name: content-types-config
+                  mountPath: /app/config
+                  readOnly: true
+              resources:
+                requests:
+                  memory: "256Mi"
+                  cpu: "200m"
+                limits:
+                  memory: "1Gi"
+          volumes:
+            - name: content-types-config
+              configMap:
+                name: indexer-content-types-config

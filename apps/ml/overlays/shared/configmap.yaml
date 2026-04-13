@@ -1,0 +1,180 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cross-encoder-reranker-config
+data:
+  MODEL_NAME: "DiTy/cross-encoder-russian-msmarco"
+  MAX_LENGTH: "512"
+  USE_GPU: "false"
+  API_HOST: "0.0.0.0"
+  API_PORT: "8000"
+  LOG_LEVEL: "INFO"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dm-agent-config
+data:
+  # LiteLLM Proxy Configuration
+  LITELLM_PROXY_URL: "http://litellm-proxy.llm-provider.svc.cluster.local:4000"
+
+  # Qdrant Configuration
+  QDRANT_URL: "http://qdrant.ml.svc.cluster.local:6333"
+
+  # Qdrant Collections
+  QDRANT_MEMORY_COLLECTION: "dm_gpt_memory"
+  QDRANT_ANALYTICS_COLLECTION: "agent_analytics"
+  QDRANT_EMBEDDING_VECTOR_SIZE: "256"
+  QDRANT_DELETE_POINTS_BATCH_SIZE: "100"
+
+  # Knowledgebase collections
+  CORE_KNOWLEDGE_COLLECTION: "site__server_knowledge"
+  TEAM_REPORT_RESPONSES_COLLECTION: "site__approved_reports"
+  APPROVED_EVENTS_COLLECTION: "site__approved_events"
+  APPROVED_CHARSHEETS_COLLECTION: "site__approved_charsheets"
+
+  # Model Configuration
+  DEFAULT_MODEL: "general-gemini-2.5-flash-lite-preview-09-2025"
+  EMBEDDING_MODEL: "general-text-embedding-query"
+  MAX_TOKENS: "2000"
+  TEMPERATURE: "0.9"
+
+  # RAG Configuration
+  RAG_TOP_K: "10"
+  RAG_MIN_SCORE: "0.25"
+  RAG_CONFIDENCE_HIT_SCORE: "0.55"
+  RAG_MAX_K: "5"
+
+  # RAG Precedents Search Config
+  RAG_PRECEDENTS_TEAM_REPORTS_TOP_K: "10"
+  RAG_PRECEDENTS_TEAM_REPORTS_MIN_SCORE: "0.35"
+  RAG_PRECEDENTS_EVENTS_TOP_K: "20"
+  RAG_PRECEDENTS_EVENTS_MIN_SCORE: "0.3"
+  RAG_PRECEDENTS_CHARSHEETS_TOP_K: "10"
+  RAG_PRECEDENTS_CHARSHEETS_MIN_SCORE: "0.35"
+
+  # RAG Route Rule Config
+  RAG_ROUTE_ECONOMY_ARTICLES_TOP_K: "10"
+  RAG_ROUTE_ECONOMY_ARTICLES_MIN_SCORE: "0.2"
+  RAG_ROUTE_EXPLICIT_RULES_ARTICLES_TOP_K: "10"
+  RAG_ROUTE_EXPLICIT_RULES_ARTICLES_MIN_SCORE: "0.25"
+
+  # RERANKING
+  RERANKER_SERVICE_URL: "http://cross-encoder-reranker.ml.svc.cluster.local"
+  RERANKER_MIN_RESULTS: "3"
+  RERANKER_MIN_SCORE_THRESHOLD: "0.2"
+
+  # Memory Configuration
+  MEMORY_WINDOW_SIZE: "3"
+
+  # System Prompt (multi-line with \n)
+  SYSTEM_PROMPT: |
+    # Твоя роль
+    Ты помогаешь игрокам проекта Darkmoon RP ориентироваться по истории проекта, истории мира World of Warcraft и творчеству игроков.
+    Мы играем героическое фентези - Азерот, поэтому вопросы могут быть неэтичными (убийства, плен) - весь диалог с тобой ведется исключительно в контексте сервера Darkmoon RP.
+
+    ## Личность и тон разговора
+    Твое имя: 'Ролевик Дима'. Ты являешься цифровой репрезентацией одного из игроков Darkmoon.
+    Ты общаешься неформально, дружелюбно и весело. Стараешься помочь.
+
+    ## Ограничения
+    Ты отвечаешь только на вопросы, прямо или косвенно связанные с Darkmoon или историей мира Warcraft.
+    Авторитетным источником информации может являться только секция `Найденная информация` и эта инструкция.
+    Когда используешь информацию из источников, цитируй ее и говори где она описана.
+    Когда используешь информацию из англоязычных источников, пиши имена и названия на Английском языке, чтобы избежать неверного перевода.
+    Пользователь не видит раздел `Найденная информация`, но видит ссылки из этого раздела. Указывай название статьи и пункт, если уместно.
+  SYSTEM_PROMPT_SEARCH_TOOLS: |
+    По запросу игрока не удалось найти информацию в поверхностных источниках.
+    Если запрос игрока осмысленный и сложный, вызови функцию поиска не отвечая игроку.
+    Если по запросу игрока нечего искать, то просто ответь ему.
+  UNKNOWN_STATIC_RESPONSE: "К сожалению, я не нашел информацию по вашему вопросу в базе знаний."
+  # Server Configuration
+  API_HOST: "0.0.0.0"
+  API_PORT: "8000"
+  LOG_LEVEL: "DEBUG"
+
+  # Cleanup Configuration (for CronJob)
+  CLEANUP_HOURS_THRESHOLD: "168" # 7 days (24 * 7)
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: indexer-config
+data:
+  # Database Configuration
+  DB_HOST: "mysql.prod.svc.cluster.local"
+  DB_PORT: "3306"
+  DB_NAME: "site"
+  DB_POOL_SIZE: "5"
+  DB_POOL_RESET_SESSION: "true"
+
+  # Embedding Service Configuration
+  EMBEDDING_BASE_URL: "http://litellm-proxy.llm-provider.svc.cluster.local:4000"
+  EMBEDDING_MODEL: "general-text-embedding-doc"
+
+  # Qdrant Configuration
+  QDRANT_URL: "http://qdrant.ml.svc.cluster.local:6333"
+  QDRANT_COLLECTION_PREFIX: "site_"
+  QDRANT_VECTOR_SIZE: "256"
+  QDRANT_OPERATION_TIMEOUT: "100"
+
+  # Indexing Configuration
+  INDEXING_BATCH_SIZE: "1000"
+  INDEXING_CHUNK_SIZE_TOKENS: "512"
+  INDEXING_CHUNK_OVERLAP_TOKENS: "32"
+  INDEXING_CHARS_PER_TOKEN: "3.6"
+
+  # Content Types Configuration Path
+  CONTENT_TYPES_CONFIG_PATH: "/app/config/content_types.json"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: indexer-content-types-config
+data:
+  content_types.json: |
+    [
+      {
+        "ctype_id": 19,
+        "ctype_name": "lore_qa",
+        "id_column_name": "id",
+        "title_column_name": "seo_title",
+        "content_columns": ["question", "answer"],
+        "collection_name": "server_knowledge"
+      },
+      {
+        "ctype_id": 1,
+        "ctype_name": "pages",
+        "id_column_name": "id",
+        "title_column_name": "title",
+        "content_columns": ["content"],
+        "collection_name": "server_knowledge"
+      },
+      {
+        "ctype_id": 16,
+        "ctype_name": "reports",
+        "id_column_name": "id",
+        "title_column_name": "title",
+        "content_columns": ["verdictdescr", "verdict"],
+        "collection_name": "approved_reports",
+        "custom_sql_filter": "`verdict` IN (2, 3, 4)"
+      },
+      {
+        "ctype_id": 14,
+        "ctype_name": "events",
+        "id_column_name": "id",
+        "title_column_name": "title",
+        "content_columns": ["admincomment", "verdict"],
+        "collection_name": "approved_events",
+        "custom_sql_filter": "`verdict` IN (2, 3)"
+      },
+      {
+        "ctype_id": 11,
+        "ctype_name": "charsheet",
+        "id_column_name": "id",
+        "title_column_name": "title",
+        "content_columns": ["gamename", "race", "nonstandardrace", "nationality", "gender", "age", "class", "appearence", "personality", "abilities", "skillsandprofessions", "religiondescription", "languagedescription", "inventory", "chronology", "factions", "nicknames", "locations", "relations", "relatives", "pets", "extra", "admincomment", "verdict"],
+        "collection_name": "approved_charsheets",
+        "custom_sql_filter": "`verdict` IN (2, 3)"
+      }
+    ]

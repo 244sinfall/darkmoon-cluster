@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cross-encoder-reranker
+  labels:
+    app.kubernetes.io/name: cross-encoder-reranker
+    app.kubernetes.io/part-of: ml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cross-encoder-reranker
+      app.kubernetes.io/part-of: ml
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cross-encoder-reranker
+        app.kubernetes.io/part-of: ml
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: cross-encoder-reranker
+          image: registryv2.rp-wow.ru/cross-encoder-reranker:v0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: cross-encoder-reranker-config
+          resources:
+            requests:
+              memory: "2Gi" # Model loading requires significant memory
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+          #            cpu: "3000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60 # Give model time to load
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 90 # Model loading can take time
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dm-agent
+  labels:
+    app.kubernetes.io/name: dm-agent
+    app.kubernetes.io/part-of: ml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dm-agent
+      app.kubernetes.io/part-of: ml
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dm-agent
+        app.kubernetes.io/part-of: ml
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      #      nodeSelector:
+      #        kubernetes.io/hostname: ksckfmlzfa
+      containers:
+        - name: dm-agent
+          image: registryv2.rp-wow.ru/dm-gpt-agent:v0.1.16
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: dm-agent-config
+            - secretRef:
+                name: dm-agent-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+          #          limits:
+          #            memory: "2Gi"
+          #            cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /internal/health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /internal/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
