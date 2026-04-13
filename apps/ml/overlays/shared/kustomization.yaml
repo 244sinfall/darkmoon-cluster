@@ -6,3 +6,10 @@ resources:
   - configmap.yaml
 generators:
   - secret-generator.yaml
+replicas:
+  - name: qdrant
+    count: 0
+  - name: dm-agent
+    count: 0
+  - name: cross-encoder-reranker
+    count: 0
