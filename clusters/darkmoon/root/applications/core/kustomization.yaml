@@ -8,6 +8,5 @@ resources:
   - ingress-nginx.yaml
   - local-path-provisioner.yaml
   - litellm.yaml
-  - ml.yaml
   - nfs-server-provisioner.yaml
   - vpn.yaml

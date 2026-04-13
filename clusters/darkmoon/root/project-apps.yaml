@@ -19,6 +19,8 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: prod-integrations
       server: https://kubernetes.default.svc
+    - namespace: ml
+      server: https://kubernetes.default.svc
     - namespace: playground
       server: https://kubernetes.default.svc
   clusterResourceWhitelist: []
