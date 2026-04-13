@@ -1,0 +1,152 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wtools-integration-service
+  labels:
+    app.kubernetes.io/name: wtools-integration-service
+    app.kubernetes.io/part-of: integrations
+    app.kubernetes.io/component: wtools-integration-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: wtools-integration-service
+      app.kubernetes.io/part-of: integrations
+      app.kubernetes.io/component: wtools-integration-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: wtools-integration-service
+        app.kubernetes.io/part-of: integrations
+        app.kubernetes.io/component: wtools-integration-service
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: rpwowru
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: wtools-integration-service
+          image: registry.rp-wow.ru/darkmoon-wtools-integration-service:v1.0.0
+          command: ["dotnet", "wow.tools.local.dll"]
+          volumeMounts:
+            - name: wowclient-volume
+              mountPath: /wowclient
+            - name: files-volume
+              mountPath: /app/appsettings.json
+              subPath: wtools.appsettings.json
+            - name: config-volume
+              mountPath: /app/config.json
+              subPath: config.json
+      volumes:
+        - name: wowclient-volume
+          hostPath:
+            path: /mnt/wowclient
+            type: Directory
+        - name: config-volume
+          configMap:
+            name: wtools-integration-service-config
+        - name: files-volume
+          secret:
+            secretName: integrations-files
+            items:
+              - key: wtools.appsettings.json
+                path: wtools.appsettings.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wapi-integration-service-backend
+  labels:
+    app.kubernetes.io/name: wapi-integration-service-backend
+    app.kubernetes.io/part-of: integrations
+    app.kubernetes.io/component: wapi-integration-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: wapi-integration-service-backend
+      app.kubernetes.io/part-of: integrations
+      app.kubernetes.io/component: wapi-integration-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: wapi-integration-service-backend
+        app.kubernetes.io/part-of: integrations
+        app.kubernetes.io/component: wapi-integration-service
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: wapi-backend
+          image: registry.rp-wow.ru/wapi-integration-service-backend:v1.0.0
+          ports:
+            - containerPort: 4000
+          env:
+            - name: BACKEND_PORT
+              value: "4000"
+          envFrom:
+            - secretRef:
+                name: integrations-env
+          volumeMounts:
+            - name: firebase-adminsdk
+              mountPath: /app/darkmoon-web-api-2-firebase-credentials.json
+              subPath: darkmoon-web-api-2-firebase-credentials.json
+            - name: assets
+              mountPath: /app/assets
+      volumes:
+        - name: firebase-adminsdk
+          secret:
+            secretName: integrations-files
+            items:
+              - key: wapi-credentials.json
+                path: darkmoon-web-api-2-firebase-credentials.json
+        - name: assets
+          persistentVolumeClaim:
+            claimName: wapi-assets-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wapi-integration-service-frontend
+  labels:
+    app.kubernetes.io/name: wapi-integration-service-frontend
+    app.kubernetes.io/part-of: integrations
+    app.kubernetes.io/component: wapi-integration-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: wapi-integration-service-frontend
+      app.kubernetes.io/part-of: integrations
+      app.kubernetes.io/component: wapi-integration-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: wapi-integration-service-frontend
+        app.kubernetes.io/part-of: integrations
+        app.kubernetes.io/component: wapi-integration-service
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: wapi-frontend
+          image: registry.rp-wow.ru/wapi-integration-service-frontend:v1.0.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: FRONTEND_PORT
+              value: "3000"
+          envFrom:
+            - secretRef:
+                name: integrations-env
+          volumeMounts:
+            - name: firebase-adminsdk
+              mountPath: /app/darkmoon-web-api-2-firebase-credentials.json
+              subPath: darkmoon-web-api-2-firebase-credentials.json
+      volumes:
+        - name: firebase-adminsdk
+          secret:
+            secretName: integrations-files
+            items:
+              - key: wapi-credentials.json
+                path: darkmoon-web-api-2-firebase-credentials.json

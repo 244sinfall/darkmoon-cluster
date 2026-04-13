@@ -1,0 +1,54 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wapi-integration-service-backend
+  labels:
+    app.kubernetes.io/name: wapi-integration-service-backend
+    app.kubernetes.io/part-of: integrations
+    app.kubernetes.io/component: wapi-integration-service
+spec:
+  selector:
+    app.kubernetes.io/name: wapi-integration-service-backend
+    app.kubernetes.io/part-of: integrations
+    app.kubernetes.io/component: wapi-integration-service
+  ports:
+    - protocol: TCP
+      port: 4000
+      targetPort: 4000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wapi-integration-service-frontend
+  labels:
+    app.kubernetes.io/name: wapi-integration-service-frontend
+    app.kubernetes.io/part-of: integrations
+    app.kubernetes.io/component: wapi-integration-service
+spec:
+  selector:
+    app.kubernetes.io/name: wapi-integration-service-frontend
+    app.kubernetes.io/part-of: integrations
+    app.kubernetes.io/component: wapi-integration-service
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wtools-integration-service
+  labels:
+    app.kubernetes.io/name: wtools-integration-service
+    app.kubernetes.io/part-of: integrations
+    app.kubernetes.io/component: wtools-integration-service
+spec:
+  ports:
+    - port: 8080
+  selector:
+    app.kubernetes.io/name: wtools-integration-service
+    app.kubernetes.io/part-of: integrations
+    app.kubernetes.io/component: wtools-integration-service

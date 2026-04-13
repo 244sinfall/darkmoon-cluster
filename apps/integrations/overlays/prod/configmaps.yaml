@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wtools-integration-service-config
+  labels:
+    app.kubernetes.io/part-of: integrations
+data:
+  config.json: |
+    {
+      "config": {
+        "definitionDir": "WoWDBDefs/definitions",
+        "dbcFolder": "dbcs",
+        "manifestFolder": "manifests",
+        "listfileURL": "https://github.com/wowdev/wow-listfile/releases/latest/download/community-listfile-withcapitals.csv",
+        "tactKeyURL": "https://github.com/wowdev/TACTKeys/raw/master/WoW.txt",
+        "wowFolder": "/wowclient",
+        "wowProduct": "wow",
+        "region": "eu",
+        "locale": "ruRU",
+        "showAllFiles": false,
+        "extractionDir": "extract",
+        "preferHighResTextures": false
+      }
+    }

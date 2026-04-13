@@ -1,0 +1,55 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  name: wtools-integration-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: wtools.rp-wow.ru
+      http:
+        paths:
+          - backend:
+              service:
+                name: wtools-integration-service
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - wtools.rp-wow.ru
+      secretName: wtools-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wapi-integration-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: wapi.rp-wow.ru
+      http:
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: wapi-integration-service-backend
+                port:
+                  number: 4000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wapi-integration-service-frontend
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - wapi.rp-wow.ru
+      secretName: wapi-tls

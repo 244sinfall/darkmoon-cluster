@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - statefulsets.yaml
+  - infrastructure-services.yaml
+  - runtime-deployments.yaml
+  - runtime-services.yaml
