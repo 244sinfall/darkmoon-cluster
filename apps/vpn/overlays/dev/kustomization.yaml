@@ -7,3 +7,4 @@ generators:
   - secret-generator.yaml
 patches:
   - path: deployments-dev-patch.yaml
+  - path: openvpn-external-dev-patch.yaml
