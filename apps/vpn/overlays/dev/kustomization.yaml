@@ -5,3 +5,5 @@ resources:
   - ../../base
 generators:
   - secret-generator.yaml
+patches:
+  - path: deployments-dev-patch.yaml
