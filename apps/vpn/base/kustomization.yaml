@@ -3,5 +3,8 @@ kind: Kustomization
 resources:
   - deployments.yaml
   - network-policies.yaml
+  - openvpn-configmaps.yaml
+  - openvpn-deployments.yaml
+  - openvpn-services.yaml
   - persistent-volume-claims.yaml
   - services.yaml

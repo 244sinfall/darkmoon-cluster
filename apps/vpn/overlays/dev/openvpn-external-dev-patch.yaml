@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openvpn-external
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: control-plane.dm
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
