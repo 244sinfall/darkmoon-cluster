@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/component: default
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
@@ -23,7 +23,7 @@ metadata:
     app.kubernetes.io/component: internal
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
@@ -38,7 +38,7 @@ metadata:
     app.kubernetes.io/component: external
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
