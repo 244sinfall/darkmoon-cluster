@@ -12,7 +12,6 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: nfs-shared
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -28,7 +27,6 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: nfs-shared
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -44,4 +42,3 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: nfs-shared
