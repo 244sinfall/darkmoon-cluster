@@ -32,6 +32,8 @@ spec:
               value: "production"
             - name: WG_PRE_UP
               value: sysctl net.ipv4.ip_forward=1
+            - name: CONNECTING_CLIENT_LIMIT
+              value: "16"
           ports:
             - name: wireguard
               containerPort: 51820
@@ -43,9 +45,7 @@ spec:
             - mountPath: /etc/wireguard
               name: wg-config
           securityContext:
-            capabilities:
-              add:
-                - NET_ADMIN
+            privileged: true
       volumes:
         - name: wg-config
           persistentVolumeClaim:
