@@ -6,16 +6,12 @@ spec:
   template:
     spec:
       nodeSelector:
-        kubernetes.io/hostname: control-plane.dm
-      tolerations:
-        - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-          effect: NoSchedule
+        kubernetes.io/hostname: dmvpn
       containers:
         - name: wg-rest-api
           env:
             - name: WG_HOST
-              value: "176.12.77.213"
+              value: "212.74.231.117"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -25,7 +21,7 @@ spec:
   template:
     spec:
       nodeSelector:
-        kubernetes.io/hostname: control-plane.dm
+        kubernetes.io/hostname: dmvpn
       tolerations:
         - key: node-role.kubernetes.io/control-plane
           operator: Exists
@@ -34,7 +30,7 @@ spec:
         - name: wg-rest-api
           env:
             - name: WG_HOST
-              value: "176.12.77.213"
+              value: "212.74.231.117"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -44,13 +40,9 @@ spec:
   template:
     spec:
       nodeSelector:
-        kubernetes.io/hostname: control-plane.dm
-      tolerations:
-        - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-          effect: NoSchedule
+        kubernetes.io/hostname: dmvpn
       containers:
         - name: wg-rest-api
           env:
             - name: WG_HOST
-              value: "176.12.77.213"
+              value: "212.74.231.117"
