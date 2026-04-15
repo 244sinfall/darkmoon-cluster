@@ -357,7 +357,7 @@ spec:
       - name: regcred
       containers:
       - name: launcher-service-dotnet-service
-        image: registryv2.rp-wow.ru/launcher-service:v1.0.1
+        image: registryv2.rp-wow.ru/launcher-service:v1.1.0
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
@@ -369,6 +369,8 @@ spec:
           mountPath: /app/appsettings.json
           subPath: appsettings.json
           readOnly: true
+        - name: artifacts
+          mountPath: /app/artifacts
       volumes:
       - name: appsettings
         secret:
@@ -377,6 +379,9 @@ spec:
           items:
           - key: launcher-service-dotnet-service.appsettings.json
             path: appsettings.json
+      - name: artifacts
+        persistentVolumeClaim:
+          claimName: launcher-service-artifacts-pvc
 ---
 apiVersion: apps/v1
 kind: Deployment
