@@ -436,7 +436,7 @@ spec:
       - name: regcred
       containers:
       - name: vpn-service-python-service
-        image: registryv2.rp-wow.ru/darkmoon-vpn-service:v0.1.4
+        image: registryv2.rp-wow.ru/darkmoon-vpn-service:v0.1.5
         imagePullPolicy: Always
         command:
         - /bin/sh
