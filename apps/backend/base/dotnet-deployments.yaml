@@ -72,7 +72,7 @@ spec:
       - name: regcred
       containers:
       - name: auth-service-dotnet-service
-        image: registryv2.rp-wow.ru/auth-service:v0.1.3
+        image: registryv2.rp-wow.ru/auth-service:v0.1.4
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
