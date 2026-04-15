@@ -27,6 +27,7 @@ spec:
             - registryv2.rp-wow.ru
           annotations:
             cert-manager.io/cluster-issuer: letsencrypt-prod
+            nginx.ingress.kubernetes.io/proxy-body-size: "1000m"
           tls:
             - secretName: registryv2-rp-wow-ru-tls
               hosts:
