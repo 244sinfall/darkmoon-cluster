@@ -9,7 +9,7 @@ patches:
   - path: deployments-dev-patch.yaml
 replicas:
   - name: wg-rest-api-default
-    count: 0
+    count: 1
   - name: wg-rest-api-internal
     count: 1
   - name: wg-rest-api-external
