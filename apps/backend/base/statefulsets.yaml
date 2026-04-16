@@ -100,26 +100,6 @@ spec:
             secretKeyRef:
               name: backend-env
               key: vpn_service-postgres-password
-        readinessProbe:
-          exec:
-            command:
-            - sh
-            - -ec
-            - pg_isready -h "$POD_IP" -p 5432 -U postgres
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 6
-        livenessProbe:
-          exec:
-            command:
-            - sh
-            - -ec
-            - pg_isready -h "$POD_IP" -p 5432 -U postgres
-          initialDelaySeconds: 30
-          periodSeconds: 20
-          timeoutSeconds: 5
-          failureThreshold: 6
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File

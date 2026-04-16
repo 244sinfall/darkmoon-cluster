@@ -10,6 +10,26 @@ spec:
       containers:
         - name: postgres
           image: postgres:17-alpine
+          readinessProbe:
+            exec:
+              command:
+              - sh
+              - -ec
+              - pg_isready -h "$POD_IP" -p 5432 -U postgres
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command:
+              - sh
+              - -ec
+              - pg_isready -h "$POD_IP" -p 5432 -U postgres
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
   volumeClaimTemplates:
     - metadata:
         name: postgres-data
