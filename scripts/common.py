@@ -270,11 +270,26 @@ def build_kustomize(settings: Settings, path: str) -> list[dict[str, Any]]:
 def build_secret_source_index(
     settings: Settings,
     root_docs: Iterable[dict[str, Any]] | None = None,
+    allow_missing_encrypted_paths: set[Path] | None = None,
 ) -> dict[tuple[str, str], SecretSourceReference]:
+    allowed_missing = {path.resolve() for path in allow_missing_encrypted_paths or set()}
     index: dict[tuple[str, str], SecretSourceReference] = {}
     for app in local_applications(settings, root_docs):
         ksops_files = collect_ksops_files(settings.repo_root / app.source_path)
         if not ksops_files:
+            continue
+
+        missing_allowed = [
+            ksops_file.encrypted_path
+            for ksops_file in ksops_files
+            if not ksops_file.encrypted_path.exists() and ksops_file.encrypted_path in allowed_missing
+        ]
+        if missing_allowed:
+            missing = ", ".join(display_path(path, settings.repo_root) for path in missing_allowed)
+            print(
+                f"Skipping source index for Application {app.name}; encrypted source does not exist yet: {missing}",
+                file=sys.stderr,
+            )
             continue
 
         secret_sources: dict[str, SecretSourceReference] = {}

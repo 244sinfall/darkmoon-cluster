@@ -29,6 +29,9 @@ from common import (  # noqa: E402
 )
 
 
+LOCAL_METADATA_FIELDS = {"source", "rendered", "keys"}
+
+
 @dataclass(frozen=True)
 class SecretRequest:
     metadata_path: Path
@@ -58,15 +61,17 @@ def main() -> int:
     for target_path, target_requests in grouped_by_target(requests).items():
         request = merged_request(settings, target_path, target_requests)
         target_exists = target_path.exists()
-        template = decrypt_secret_source(settings, target_path) if target_exists else build_new_secret_template(request.metadata)
+        raw_template = decrypt_secret_source(settings, target_path) if target_exists else build_new_secret_template(request.metadata)
+        template = clean_secret_template(raw_template)
         updated = apply_flattened_values(template, request.values, request.value_field)
+        template_changed = raw_template != template
         generator_needs_entry = (
             not target_exists
             and request.generator_path is not None
             and not generator_contains_target(request.generator_path, target_path)
         )
 
-        if target_exists and secret_values(template) == secret_values(updated):
+        if target_exists and template == updated and not template_changed:
             print(f"Skipped unchanged {request.app_name}/{request.secret_name} -> {display_path(target_path, settings.repo_root)}")
             skipped += 1
             continue
@@ -110,6 +115,19 @@ def parse_args() -> argparse.Namespace:
         help="Resolve sources and rebuild in memory without writing encrypted files.",
     )
     return parser.parse_args()
+
+
+def metadata_target_paths(settings, secrets_root: Path) -> set[Path]:
+    targets: set[Path] = set()
+    for metadata_path in sorted(secrets_root.glob("*/*/metadata.yaml")):
+        metadata = read_yaml(metadata_path)
+        source = metadata.get("source") or {}
+        if not isinstance(source, dict):
+            continue
+        target = source.get("encryptedPath") or source.get("targetPath")
+        if target:
+            targets.add(resolve_repo_path(settings, str(target), "source.encryptedPath"))
+    return targets
 
 
 def collect_requests(
@@ -235,7 +253,7 @@ def build_new_secret_template(metadata: dict[str, Any]) -> dict[str, Any]:
     secret = {
         key: value
         for key, value in metadata.items()
-        if key not in {"source", "rendered", "data", "stringData"} and value is not None
+        if key not in LOCAL_METADATA_FIELDS | {"data", "stringData"} and value is not None
     }
     secret["apiVersion"] = secret.get("apiVersion") or "v1"
     secret["kind"] = secret.get("kind") or "Secret"
@@ -245,6 +263,14 @@ def build_new_secret_template(metadata: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(secret_metadata, dict) or not secret_metadata.get("name"):
         raise RuntimeError("metadata.yaml must include metadata.name")
     return secret
+
+
+def clean_secret_template(secret: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in secret.items()
+        if key not in LOCAL_METADATA_FIELDS and value is not None
+    }
 
 
 def apply_flattened_values(
