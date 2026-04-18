@@ -16,21 +16,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: amnezia-wg-easy
-spec:
-  template:
-    spec:
-      nodeSelector:
-        kubernetes.io/hostname: worker.dm
-      containers:
-        - name: amnezia-wg-easy
-          env:
-            - name: WG_HOST
-              value: "212.74.231.117"
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: wg-rest-api-internal
 spec:
   template:

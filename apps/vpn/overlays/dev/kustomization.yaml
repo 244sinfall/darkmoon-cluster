@@ -14,5 +14,3 @@ replicas:
     count: 1
   - name: wg-rest-api-external
     count: 1
-  - name: amnezia-wg-easy
-    count: 1
