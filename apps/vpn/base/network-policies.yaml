@@ -54,3 +54,22 @@ spec:
             except:
               - 10.0.0.0/8
               - 10.244.0.0/16
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vpn-amnezia-allow-external
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: amnezia-wg-easy
+      app.kubernetes.io/component: amnezia
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 10.244.0.0/16
