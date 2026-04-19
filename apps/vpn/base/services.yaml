@@ -81,6 +81,46 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: amnezia-wg-default-udp-external
+  labels:
+    app.kubernetes.io/name: amnezia-wg-easy
+    app.kubernetes.io/part-of: vpn
+    app.kubernetes.io/component: amnezia-default
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local
+  selector:
+    app.kubernetes.io/name: amnezia-wg-easy
+    app.kubernetes.io/component: amnezia-default
+  ports:
+    - name: wireguard
+      protocol: UDP
+      port: 51820
+      targetPort: wireguard
+      nodePort: 31824
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: amnezia-wg-default-ui-internal
+  labels:
+    app.kubernetes.io/name: amnezia-wg-easy
+    app.kubernetes.io/part-of: vpn
+    app.kubernetes.io/component: amnezia-default
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: amnezia-wg-easy
+    app.kubernetes.io/component: amnezia-default
+  ports:
+    - name: ui
+      protocol: TCP
+      port: 51821
+      targetPort: ui
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: wg-internal-udp-external
   labels:
     app.kubernetes.io/name: wg-rest-api

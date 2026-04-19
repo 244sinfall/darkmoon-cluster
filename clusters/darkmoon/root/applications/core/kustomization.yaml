@@ -10,3 +10,4 @@ resources:
   - litellm.yaml
   - nfs-server-provisioner.yaml
   - vpn.yaml
+  - shared-secrets-vpn.yaml

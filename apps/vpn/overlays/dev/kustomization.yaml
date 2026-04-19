@@ -16,3 +16,5 @@ replicas:
     count: 1
   - name: amnezia-wg-easy
     count: 1
+  - name: amnezia-wg-easy-default
+    count: 1
