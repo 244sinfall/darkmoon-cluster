@@ -448,6 +448,16 @@ spec:
           containerPort: 3000
           protocol: TCP
         env:
+        - name: AWG_BASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: vpn-service-python-service.AWG_BASE_URL
+        - name: AWG_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-env
+              key: vpn-service-python-service.AWG_PASSWORD
         - name: VPN_BASE_URL
           valueFrom:
             secretKeyRef:
