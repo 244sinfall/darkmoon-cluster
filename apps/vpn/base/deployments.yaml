@@ -252,6 +252,8 @@ spec:
         app.kubernetes.io/part-of: vpn
         app.kubernetes.io/component: amnezia-default
     spec:
+      imagePullSecrets:
+        - name: regcred
       containers:
         - name: amnezia-wg-easy
           image: registryv2.rp-wow.ru/amnezia-wg-easy:14
