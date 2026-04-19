@@ -25,7 +25,7 @@ spec:
       - name: regcred
       containers:
       - name: api-gateway-service-dotnet-service
-        image: registryv2.rp-wow.ru/darkmoon-web-api-gateway-service:v0.1.23
+        image: registryv2.rp-wow.ru/darkmoon-web-api-gateway-service:v0.1.24
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
