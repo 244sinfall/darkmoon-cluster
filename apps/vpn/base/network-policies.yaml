@@ -58,6 +58,26 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
+  name: vpn-amnezia-default-allow-dm-infra
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: amnezia-wg-easy
+      app.kubernetes.io/component: amnezia-default
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 65.108.101.119/32
+        - ipBlock:
+            cidr: 135.125.233.102/32
+        - ipBlock:
+            cidr: 5.39.76.31/32
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
   name: vpn-amnezia-allow-external
 spec:
   podSelector:

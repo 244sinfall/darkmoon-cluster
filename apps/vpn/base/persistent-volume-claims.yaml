@@ -31,6 +31,21 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  name: amnezia-wg-easy-default-config
+  labels:
+    app.kubernetes.io/name: amnezia-wg-easy
+    app.kubernetes.io/part-of: vpn
+    app.kubernetes.io/component: amnezia-default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
   name: wg-rest-pvc-internal
   labels:
     app.kubernetes.io/name: wg-rest-api
